@@ -1,0 +1,21 @@
+{
+  "name": "portfolio-v2",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "prebuild": "npm run prettier",
+    "build": "tsc && vite build",
+    "serve": "vite preview",
+    "prettier": "prettier --write ."
+  },
+  "author": {
+    "name": "Rajaniraiyn",
+    "email": "rajaniraiyn@gmail.com",
+    "url": "https://rajaniraiyn.github.io/"
+  },
+  "devDependencies": {
+    "prettier": "^2.4.1",
+    "typescript": "^4.3.2",
+    "vite": "^2.6.4"
+  }
+}
