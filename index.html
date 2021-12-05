@@ -1,16 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" sizes="60x60" href="data:image/png;base64,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" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Rajaniraiyn's Portfolio</title>
-    <meta name="color-scheme" content="dark light" />
+    <meta name="description" content="Your app description" />
+
+    <!-- Icons and Colors -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta name="apple-mobile-web-app-title" content="Rajaniraiyn's Portfolio" />
+    <meta name="application-name" content="Rajaniraiyn's Portfolio" />
+    <meta name="msapplication-TileColor" content="#603cba" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      href="https://fonts.gstatic.com/s/comfortaa/v34/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4WjMDrMfIA.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="https://fonts.gstatic.com/s/josefinsans/v20/Qw3PZQNVED7rKGKxtqIqX5E-AVSJrOCfjY46_DjQbMZhLw.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <!-- Script -->
     
-    <script type="module" crossorigin src="/assets/index.7d53e90a.js"></script>
-    <link rel="stylesheet" href="/assets/index.709ad59c.css">
-  </head>
+    <script type="module" crossorigin src="/assets/index.5cce5a9d.js"></script>
+    <link rel="stylesheet" href="/assets/index.56cff63c.css">
+  <link rel="manifest" href="/manifest.webmanifest"></head>
 
   <body>
     <div id="app">
@@ -79,6 +108,7 @@
           <!-- #0 is the best practice for empty links -->
           <li><a href="#0">Home</a></li>
           <li><a href="#about">About</a></li>
+          <li><a href="#languages">Languages</a></li>
           <li><a href="#projects">Projects</a></li>
           <li><a href="#contact">Contact</a></li>
         </ul>
@@ -490,7 +520,7 @@
               <div class="project-item">
                 <img
                   class="project-bg"
-                  src="/assets/wish.70982ccd.png"
+                  src="/assets/wish.57848282.png"
                   alt="Wish Image"
                 />
                 <div class="project-description">
@@ -646,7 +676,7 @@
       <!-- sparse objects -->
       <div class="object">
         <img
-          src="/assets/rocket.fcbe887a.png"
+          src="/assets/rocket.72667df1.png"
           loading="lazy"
           alt="Rocket"
           id="obj-rocket"
