@@ -225,6 +225,7 @@ main {
 main section {
   padding: 1rem;
   background-color: transparent;
+  scroll-margin-block-start: 4em;
 }
 
 main h2 {
