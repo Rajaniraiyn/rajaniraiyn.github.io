@@ -14,7 +14,7 @@
     "url": "https://rajaniraiyn.github.io/"
   },
   "devDependencies": {
-    "prettier": "^2.8.5",
+    "prettier": "^2.8.7",
     "typescript": "^5.0.2",
     "vite": "^4.2.1"
   }
