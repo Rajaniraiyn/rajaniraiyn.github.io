@@ -24,4 +24,5 @@ pnpm-debug.log*
 .idea/
 
 # vercel output
-.vercelgenerate_refresh_token.js
+.vercel
+generate_refresh_token.js
