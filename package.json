@@ -1,21 +1,45 @@
 {
-  "name": "portfolio-v2",
-  "version": "0.0.0",
+  "name": "portfolio",
+  "type": "module",
+  "version": "0.0.1",
   "scripts": {
-    "dev": "vite",
-    "prebuild": "npm run prettier",
-    "build": "tsc && vite build",
-    "serve": "vite preview",
-    "prettier": "prettier --write ."
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
   },
-  "author": {
-    "name": "Rajaniraiyn",
-    "email": "rajaniraiyn@gmail.com",
-    "url": "https://rajaniraiyn.github.io/"
+  "dependencies": {
+    "@astrojs/mdx": "^4.0.3",
+    "@astrojs/react": "^4.1.2",
+    "@astrojs/sitemap": "^3.2.1",
+    "@astrojs/tailwind": "^5.1.4",
+    "@astrojs/vercel": "^8.0.1",
+    "@number-flow/react": "^0.4.4",
+    "@radix-ui/react-hover-card": "^1.1.4",
+    "@std/async": "npm:@jsr/std__async",
+    "@std/cache": "npm:@jsr/std__cache",
+    "@std/ulid": "npm:@jsr/std__ulid",
+    "@tanstack/react-query": "^5.62.11",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "astro": "^5.1.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^11.15.0",
+    "lucide-react": "^0.469.0",
+    "motion": "^11.15.0",
+    "qss": "^3.0.0",
+    "react": "^19.0.0",
+    "react-compiler-runtime": "^19.0.0-beta-55955c9-20241229",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^2.6.0",
+    "tailwindcss": "^3.4.17",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "prettier": "^3.4.2",
-    "typescript": "^5.7.2",
-    "vite": "^6.0.6"
+    "@tailwindcss/typography": "^0.5.15",
+    "babel-plugin-react-compiler": "^19.0.0-beta-55955c9-20241229",
+    "lenis": "^1.1.18",
+    "lightningcss": "^1.28.2"
   }
 }

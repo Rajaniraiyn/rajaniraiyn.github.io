@@ -1,0 +1,52 @@
+---
+// import CurlyCursor from "@/components/curly-cursor.astro";
+import { CurrentlyPlaying } from "@/components/currently-playing";
+import { HelloText } from "@/components/hello";
+import { GradualSpacing } from "@/components/ui/gradual-spacing";
+import Layout from "@/layouts/root.astro";
+import { Image } from "astro:assets";
+---
+
+<Layout>
+  <!-- <CurlyCursor /> -->
+  <HelloText client:idle />
+
+  <section class="min-h-screen py-10 max-w-screen-md mx-auto space-y-10">
+    <div class="flex items-center gap-2">
+      <Image
+        class="size-20 rounded-full"
+        src="https://github.com/rajaniraiyn.png"
+        width={80}
+        height={80}
+        alt="Rajaniraiyn"
+      />
+      <h1 class="text-4xl font-bold">
+        <GradualSpacing client:load text="Rajaniraiyn" />
+      </h1>
+    </div>
+    <div class="text-xl space-y-5">
+      <p>
+        I am a software engineer, crafting applications and tools for about half
+        a decade now. Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+        Libero dolorum autem expedita tempore. Vero in numquam architecto!
+        Nostrum quas ea accusantium officia iusto, odio ullam perferendis ipsa
+        dolores molestias nisi?
+      </p>
+      <p>
+        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Id, eveniet
+        assumenda. Hic ratione consectetur quis iste iusto accusantium
+        distinctio dolore optio rerum, quisquam placeat aspernatur corrupti et
+        inventore doloremque exercitationem? Lorem ipsum dolor sit, amet
+        consectetur adipisicing elit. Id, eveniet assumenda. Hic ratione
+        consectetur quis iste iusto accusantium distinctio dolore optio rerum,
+        quisquam placeat aspernatur corrupti et inventore doloremque Lorem ipsum
+        dolor sit, amet consectetur adipisicing elit. Id, eveniet assumenda. Hic
+        ratione consectetur quis iste iusto accusantium distinctio dolore optio
+        rerum, quisquam placeat aspernatur corrupti et inventore doloremque
+        exercitationem? exercitationem?
+      </p>
+    </div>
+  </section>
+
+  <CurrentlyPlaying client:idle />
+</Layout>
