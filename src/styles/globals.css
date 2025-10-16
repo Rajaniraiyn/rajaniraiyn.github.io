@@ -144,8 +144,9 @@
   }
 
   body {
-    @apply bg-background text-foreground font-geist-mono;
+    @apply bg-background text-foreground font-geist-mono scheme-light-dark;
     @apply relative; /* hack for dialog backdrop to cover full viewport on iOS 26+ Safari */
+    @apply selection:bg-foreground/50 selection:text-background;
   }
 
   /* For BaseUI portals to layer above the rest of the app */

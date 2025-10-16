@@ -1,4 +1,6 @@
+import { HyperText } from "@/components/ui/hyper-text";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 export function Header({ className, ...props }: React.ComponentProps<'header'>) {
     return (
@@ -6,14 +8,11 @@ export function Header({ className, ...props }: React.ComponentProps<'header'>) 
             className={cn({ "drop-shadow-secondary drop-shadow-md": false, }, className)}
             {...props}
         >
-            {/* <div className='w-full h-1 bg-background' /> */}
+            <div className='w-full h-1 bg-background' />
             <div className='flex flex-row'>
-                <h3 className='text-3xl font-extrabold font-departure-mono uppercase bg-background p-3 rounded-br-4xl'>
-                    Rajaniraiyn
-                </h3>
+                <Name className='bg-background p-3 rounded-br-4xl' />
                 <svg
-                    width="30"
-                    height="30"
+                    className='size-7'
                     viewBox="0 0 30 30"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg">
@@ -30,8 +29,7 @@ export function Header({ className, ...props }: React.ComponentProps<'header'>) 
                 </svg>
             </div>
             <svg
-                className=""
-                width="30" height="30"
+                className="size-7"
                 viewBox="0 0 30 30"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -46,5 +44,21 @@ export function Header({ className, ...props }: React.ComponentProps<'header'>) 
                 </defs>
             </svg>
         </header>
+    )
+}
+
+function Name({ className }: { className: string }) {
+    const [nameVersion, setNameVersion] = useState<"short" | "long">("long");
+    return (
+        <HyperText
+            as='h3'
+            className={cn('text-3xl font-extrabold font-departure-mono uppercase', className)}
+            onClick={() => {
+                getSelection()?.removeAllRanges();
+                setNameVersion(prev => prev === "short" ? "long" : "short")
+            }}
+        >
+            {nameVersion === "short" ? "Raj" : "Rajaniraiyn"}
+        </HyperText>
     )
 }

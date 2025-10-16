@@ -1,1 +1,1 @@
-export { domAnimation as default } from 'motion/react'
+export { domMin as default } from 'motion/react'

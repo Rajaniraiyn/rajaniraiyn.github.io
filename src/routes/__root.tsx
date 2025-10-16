@@ -1,6 +1,9 @@
 import { Footer } from '@/components/footer'
 import { Sidebar } from '@/components/sidebar'
-import { Outlet, createRootRoute } from '@tanstack/react-router'
+import { createRootRoute, Outlet } from '@tanstack/react-router'
+import { lazy, Suspense } from 'react'
+
+const LazySmoothScroll = lazy(() => import('@/components/smooth-scroll').then(module => ({ default: module.SmoothScroll })))
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -16,6 +19,9 @@ function RootComponent() {
         </main>
         <Footer />
       </div>
+      <Suspense>
+        <LazySmoothScroll />
+      </Suspense>
     </div>
   )
 }

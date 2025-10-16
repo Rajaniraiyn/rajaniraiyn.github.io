@@ -1,9 +1,13 @@
+import santaBrowserFaviconSrc from '@/assets/images/santabrowser-favicon.svg'
+import { TextHighlighter } from "@/components/fancy/text/text-highlighter"
 import { Header } from '@/components/header'
 import { Accordion, AccordionItem, AccordionPanel, AccordionTrigger } from '@/components/ui/accordion'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+import { useTheme } from '@/contexts/theme'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { BuildingIcon, ExternalLink, GithubIcon } from 'lucide-react'
+import type { Transition } from "motion"
 
 export const Route = createFileRoute('/')({
     component: RouteComponent,
@@ -15,23 +19,10 @@ function RouteComponent() {
             <Header className='sticky inset-0 bottom-auto z-50 mb-0' />
             <section className='px-2'>
                 <h2 className='text-2xl font-bold sr-only'>About</h2>
-                <div className="space-y-3">
-                    <p>
-                        Dynamic and versatile engineer with 4+ years of experience specializing in frontend and desktop application development, with a strong focus on interaction engineering and user experience.
-                    </p>
-                    <p>
-                        I architect impactful solutions, lead technical direction, and obsess over the details that elevate digital products—from microinteractions to robust design systems. Whether it’s building browsers, enhancing developer tools, or creating open-source projects, I bring ideas to life through thoughtful design and meticulous engineering.
-                    </p>
-                    <p>
-                        My expertise bridges product vision and implementation—contributing to Chromium-based browsers, engineering full-stack platforms, and integrating AI capabilities for next-generation user experiences. I thrive on tackling complex problems and delivering well-crafted solutions that scale.
-                    </p>
-                    <p>
-                        I’m always exploring new technologies, mentoring teams, and advancing the craft of developer experience and interaction design. Let’s push boundaries and build incredible products.
-                    </p>
-                </div>
+                <About />
             </section>
             <section className='space-y-4 px-2'>
-                <h2 className='text-2xl font-bold'>Work Experience</h2>
+                <h2 className='text-2xl font-bold font-departure-mono uppercase'>Work Experience</h2>
                 <Accordion className='flex flex-col gap-4 md:px-5' multiple>
                     {/* <WorkExperience
                         title="Desktop Application Developer"
@@ -54,14 +45,14 @@ function RouteComponent() {
                         title="Software Developer"
                         company="Santa Browser"
                         companyUrl="https://santabrowser.com"
-                        icon="https://www.google.com/s2/favicons?domain=santabrowser.com&sz=128"
+                        icon={santaBrowserFaviconSrc}
                         startDate="2023-01-01"
                         endDate="2023-12-01"
                     />
                 </Accordion>
             </section>
             <section className='space-y-4 px-2'>
-                <h2 className='text-2xl font-bold'>Projects</h2>
+                <h2 className='text-2xl font-bold font-departure-mono uppercase'>Projects</h2>
                 <Accordion className='flex flex-col gap-4 md:px-5' multiple>
                     <Project
                         name="React Alien Signals"
@@ -192,12 +183,59 @@ function RouteComponent() {
     )
 }
 
+const CAREER_START_DATE = "2021-08-01";
+
+function About() {
+    const { resolvedTheme } = useTheme();
+
+    const highlighterProps = {
+        className: "rounded-sm px-px mix-blend-difference",
+        highlightColor: resolvedTheme === "dark"
+            ? ["hsl(30, 70%, 45%)", "hsl(25, 85%, 35%)", "hsl(20, 90%, 25%)"]
+            : ["hsl(45, 80%, 85%)", "hsl(35, 90%, 90%)", "hsl(40, 85%, 95%)"],
+        useInViewOptions: { once: true, initial: true, amount: 0.1 },
+        transition: { type: "spring", duration: 0.8, delay: 0.1, bounce: 0 } satisfies Transition,
+    } satisfies Omit<React.ComponentProps<typeof TextHighlighter>, "children">;
+
+    const careerYears = new Date().getFullYear() - new Date(CAREER_START_DATE).getFullYear();
+
+    return (
+        <div className="space-y-3">
+            <p>
+                Dynamic and versatile engineer with {careerYears}+ years of experience specializing in frontend and desktop application development, with a strong focus on{" "}
+                <TextHighlighter {...highlighterProps}>interaction engineering and user experience</TextHighlighter>
+                .
+            </p>
+            <p>
+                I architect impactful solutions, lead technical direction, and obsess over the details that elevate digital products—from{" "}
+                <TextHighlighter {...highlighterProps}>microinteractions</TextHighlighter>{" "}
+                to{" "}
+                <TextHighlighter {...highlighterProps}>robust design systems</TextHighlighter>
+                . Whether it’s building browsers, enhancing developer tools, or creating open-source projects, I bring ideas to life through{" "}
+                <TextHighlighter {...highlighterProps}>thoughtful design and meticulous engineering</TextHighlighter>
+                .
+            </p>
+            <p>
+                My expertise bridges product vision and implementation—contributing to{" "}
+                <TextHighlighter {...highlighterProps}>Chromium-based browsers</TextHighlighter>
+                , engineering full-stack platforms, and integrating{" "}
+                <TextHighlighter {...highlighterProps}>AI capabilities for next-generation user experiences</TextHighlighter>
+                . I thrive on tackling complex problems and delivering well-crafted solutions that scale.
+            </p>
+            <p>
+                I’m always exploring new technologies, mentoring teams, and advancing the craft of{" "}
+                <TextHighlighter {...highlighterProps}>developer experience and interaction design</TextHighlighter>
+                . Let’s push boundaries and build incredible products.
+            </p>
+        </div>
+    )
+}
 
 function WorkExperience({ title, company, companyUrl, icon, startDate, endDate }: { title: string, company: string, companyUrl: string, icon: string, startDate: string, endDate: string }) {
     return (
         <Card className='p-2 gap-1 last:border-b-1'>
             <CardHeader className="p-0 flex justify-between flex-row flex-wrap items-start gap-2">
-                <Avatar className="sm:size-12">
+                <Avatar className="sm:size-12 rounded-xl bg-transparent">
                     <AvatarImage src={icon} alt={company} />
                     <AvatarFallback>
                         <BuildingIcon className="size-4" />
@@ -277,7 +315,6 @@ function ProjectLinks({ github, website }: { github?: string; website?: string }
         </div>
     )
 }
-
 
 function formatDate(dateStr: string) {
     if (dateStr === "Present") return "Present"
