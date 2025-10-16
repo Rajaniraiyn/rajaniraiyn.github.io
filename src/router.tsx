@@ -1,7 +1,8 @@
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { MotionProvider } from '@/contexts/motion'
+import { TabBarProvider } from '@/contexts/tabbar'
 import { ThemeProvider } from '@/contexts/theme'
 import { createHashHistory, createRouter } from '@tanstack/react-router'
-import { MotionProvider } from './contexts/motion'
 import { routeTree } from './routeTree.gen'
 
 export function getRouter() {
@@ -17,6 +18,7 @@ export function getRouter() {
                         {children}
                     </MotionProvider>
                 </TooltipProvider>
+                <TabBarProvider />
             </ThemeProvider>
         )
     })

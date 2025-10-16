@@ -1,9 +1,12 @@
+import gameTowerPixelArtSrc from '@/assets/images/game-tower-pixel-art.jpeg'
+import naturePixelArtSrc from '@/assets/images/nature-pixel-art.jpeg'
 import santaBrowserFaviconSrc from '@/assets/images/santabrowser-favicon.svg'
 import { TextHighlighter } from "@/components/fancy/text/text-highlighter"
 import { Header } from '@/components/header'
 import { Accordion, AccordionItem, AccordionPanel, AccordionTrigger } from '@/components/ui/accordion'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tooltip, TooltipPopup, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useTheme } from '@/contexts/theme'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { BuildingIcon, ExternalLink, GithubIcon } from 'lucide-react'
@@ -186,6 +189,43 @@ function RouteComponent() {
 const CAREER_START_DATE = "2021-08-01";
 
 function About() {
+    const careerYears = new Date().getFullYear() - new Date(CAREER_START_DATE).getFullYear();
+
+    return (
+        <div className="space-y-3">
+            <TooltipProvider delay={0}>
+                <p>
+                    Dynamic and versatile engineer with {careerYears}+ years of experience specializing in frontend and desktop application development, with a strong focus on{" "}
+                    <HighlightedTextWithPreview previewUrl={naturePixelArtSrc}>interaction engineering and user experience</HighlightedTextWithPreview>
+                    .
+                </p>
+                <p>
+                    I architect impactful solutions, lead technical direction, and obsess over the details that elevate digital products—from{" "}
+                    <HighlightedTextWithPreview previewUrl={gameTowerPixelArtSrc}>microinteractions</HighlightedTextWithPreview>{" "}
+                    to{" "}
+                    <HighlightedTextWithPreview previewUrl={naturePixelArtSrc}>robust design systems</HighlightedTextWithPreview>
+                    . Whether it’s building browsers, enhancing developer tools, or creating open-source projects, I bring ideas to life through{" "}
+                    <HighlightedTextWithPreview previewUrl={naturePixelArtSrc}>thoughtful design and meticulous engineering</HighlightedTextWithPreview>
+                    .
+                </p>
+                <p>
+                    My expertise bridges product vision and implementation—contributing to{" "}
+                    <HighlightedTextWithPreview previewUrl={santaBrowserFaviconSrc}>Chromium-based browsers</HighlightedTextWithPreview>
+                    , engineering full-stack platforms, and integrating{" "}
+                    <HighlightedTextWithPreview previewUrl={naturePixelArtSrc}>AI capabilities for next-generation user experiences</HighlightedTextWithPreview>
+                    . I thrive on tackling complex problems and delivering well-crafted solutions that scale.
+                </p>
+                <p>
+                    I’m always exploring new technologies, mentoring teams, and advancing the craft of{" "}
+                    <HighlightedTextWithPreview previewUrl={naturePixelArtSrc}>developer experience and interaction design</HighlightedTextWithPreview>
+                    . Let’s push boundaries and build incredible products.
+                </p>
+            </TooltipProvider>
+        </div>
+    )
+}
+
+function HighlightedTextWithPreview({ children, previewUrl }: { children: React.ReactNode, previewUrl?: string }) {
     const { resolvedTheme } = useTheme();
 
     const highlighterProps = {
@@ -197,37 +237,18 @@ function About() {
         transition: { type: "spring", duration: 0.8, delay: 0.1, bounce: 0 } satisfies Transition,
     } satisfies Omit<React.ComponentProps<typeof TextHighlighter>, "children">;
 
-    const careerYears = new Date().getFullYear() - new Date(CAREER_START_DATE).getFullYear();
+    const highlighted = <TextHighlighter {...highlighterProps}>{children}</TextHighlighter>;
+
+    // for now, we skip the tooltip for all text
+    if (!previewUrl || true) {
+        return highlighted;
+    }
 
     return (
-        <div className="space-y-3">
-            <p>
-                Dynamic and versatile engineer with {careerYears}+ years of experience specializing in frontend and desktop application development, with a strong focus on{" "}
-                <TextHighlighter {...highlighterProps}>interaction engineering and user experience</TextHighlighter>
-                .
-            </p>
-            <p>
-                I architect impactful solutions, lead technical direction, and obsess over the details that elevate digital products—from{" "}
-                <TextHighlighter {...highlighterProps}>microinteractions</TextHighlighter>{" "}
-                to{" "}
-                <TextHighlighter {...highlighterProps}>robust design systems</TextHighlighter>
-                . Whether it’s building browsers, enhancing developer tools, or creating open-source projects, I bring ideas to life through{" "}
-                <TextHighlighter {...highlighterProps}>thoughtful design and meticulous engineering</TextHighlighter>
-                .
-            </p>
-            <p>
-                My expertise bridges product vision and implementation—contributing to{" "}
-                <TextHighlighter {...highlighterProps}>Chromium-based browsers</TextHighlighter>
-                , engineering full-stack platforms, and integrating{" "}
-                <TextHighlighter {...highlighterProps}>AI capabilities for next-generation user experiences</TextHighlighter>
-                . I thrive on tackling complex problems and delivering well-crafted solutions that scale.
-            </p>
-            <p>
-                I’m always exploring new technologies, mentoring teams, and advancing the craft of{" "}
-                <TextHighlighter {...highlighterProps}>developer experience and interaction design</TextHighlighter>
-                . Let’s push boundaries and build incredible products.
-            </p>
-        </div>
+        <Tooltip>
+            <TooltipTrigger>{highlighted}</TooltipTrigger>
+            <TooltipPopup className="rounded-md shadow-xl max-w-20 max-h-20 p-0" render={<img src={previewUrl} alt="Nature Pixel Art" />} />
+        </Tooltip>
     )
 }
 
