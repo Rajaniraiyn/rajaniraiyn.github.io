@@ -5,4 +5,5 @@
       url("@/assets/fonts/DepartureMono-Regular.woff") format("woff"),
       url("@/assets/fonts/DepartureMono-Regular.otf") format("opentype");
     font-feature-settings: "locl";
-  }
+    font-display: swap;
+}
