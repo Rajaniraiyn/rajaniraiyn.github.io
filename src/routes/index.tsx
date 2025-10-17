@@ -1,5 +1,5 @@
-import gameTowerPixelArtSrc from '@/assets/images/game-tower-pixel-art.jpeg'
-import naturePixelArtSrc from '@/assets/images/nature-pixel-art.jpeg'
+import gameTowerPixelArtSrc from '@/assets/wallpapers/game-tower.jpeg'
+import naturePixelArtSrc from '@/assets/wallpapers/nature.jpeg'
 import santaBrowserFaviconSrc from '@/assets/images/santabrowser-favicon.svg'
 import { TextHighlighter } from "@/components/fancy/text/text-highlighter"
 import { Header } from '@/components/header'
@@ -11,6 +11,7 @@ import { useTheme } from '@/contexts/theme'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { BuildingIcon, ExternalLink, GithubIcon } from 'lucide-react'
 import type { Transition } from "motion"
+import { Game } from '@/components/cheats/game'
 
 export const Route = createFileRoute('/')({
     component: RouteComponent,
@@ -182,6 +183,7 @@ function RouteComponent() {
                     />
                 </Accordion>
             </section>
+            <Game />
         </div>
     )
 }
@@ -237,7 +239,7 @@ function HighlightedTextWithPreview({ children, previewUrl }: { children: React.
         transition: { type: "spring", duration: 0.8, delay: 0.1, bounce: 0 } satisfies Transition,
     } satisfies Omit<React.ComponentProps<typeof TextHighlighter>, "children">;
 
-    const highlighted = <TextHighlighter {...highlighterProps}>{children}</TextHighlighter>;
+    const highlighted = <TextHighlighter {...highlighterProps} data-game="floor">{children}</TextHighlighter>;
 
     // for now, we skip the tooltip for all text
     if (!previewUrl || true) {

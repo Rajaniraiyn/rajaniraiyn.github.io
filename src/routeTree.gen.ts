@@ -9,11 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WallOfPapersRouteImport } from './routes/wall-of-papers'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkAtsantaRouteImport } from './routes/work/@santa'
 import { Route as WorkAtportalRouteImport } from './routes/work/@portal'
 import { Route as WorkAtabacusRouteImport } from './routes/work/@abacus'
 
+const WallOfPapersRoute = WallOfPapersRouteImport.update({
+  id: '/wall-of-papers',
+  path: '/wall-of-papers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -37,12 +43,14 @@ const WorkAtabacusRoute = WorkAtabacusRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/wall-of-papers': typeof WallOfPapersRoute
   '/work/@abacus': typeof WorkAtabacusRoute
   '/work/@portal': typeof WorkAtportalRoute
   '/work/@santa': typeof WorkAtsantaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/wall-of-papers': typeof WallOfPapersRoute
   '/work/@abacus': typeof WorkAtabacusRoute
   '/work/@portal': typeof WorkAtportalRoute
   '/work/@santa': typeof WorkAtsantaRoute
@@ -50,20 +58,38 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/wall-of-papers': typeof WallOfPapersRoute
   '/work/@abacus': typeof WorkAtabacusRoute
   '/work/@portal': typeof WorkAtportalRoute
   '/work/@santa': typeof WorkAtsantaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/work/@abacus' | '/work/@portal' | '/work/@santa'
+  fullPaths:
+    | '/'
+    | '/wall-of-papers'
+    | '/work/@abacus'
+    | '/work/@portal'
+    | '/work/@santa'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/work/@abacus' | '/work/@portal' | '/work/@santa'
-  id: '__root__' | '/' | '/work/@abacus' | '/work/@portal' | '/work/@santa'
+  to:
+    | '/'
+    | '/wall-of-papers'
+    | '/work/@abacus'
+    | '/work/@portal'
+    | '/work/@santa'
+  id:
+    | '__root__'
+    | '/'
+    | '/wall-of-papers'
+    | '/work/@abacus'
+    | '/work/@portal'
+    | '/work/@santa'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  WallOfPapersRoute: typeof WallOfPapersRoute
   WorkAtabacusRoute: typeof WorkAtabacusRoute
   WorkAtportalRoute: typeof WorkAtportalRoute
   WorkAtsantaRoute: typeof WorkAtsantaRoute
@@ -71,6 +97,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wall-of-papers': {
+      id: '/wall-of-papers'
+      path: '/wall-of-papers'
+      fullPath: '/wall-of-papers'
+      preLoaderRoute: typeof WallOfPapersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -104,6 +137,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  WallOfPapersRoute: WallOfPapersRoute,
   WorkAtabacusRoute: WorkAtabacusRoute,
   WorkAtportalRoute: WorkAtportalRoute,
   WorkAtsantaRoute: WorkAtsantaRoute,
