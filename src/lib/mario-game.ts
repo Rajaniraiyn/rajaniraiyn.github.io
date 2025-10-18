@@ -82,7 +82,7 @@ export const GAME = {
     MAX_WALK_SPEED: 120,       // px/sec maximum walking
     WALK_THRESHOLD: 18,        // px/sec to be considered walking
     RUN_THRESHOLD: 150,        // px/sec to be considered running
-    JUMP_VELOCITY: 1000,       // px/sec impulse up
+    JUMP_VELOCITY: 700,       // px/sec impulse up
     CHARACTER_WIDTH: 80,
     CHARACTER_HEIGHT: 80,
     GROUND_OFFSET: 80,         // px spacing from bottom of document
@@ -110,13 +110,154 @@ export interface GameRect {
     height: number;
 }
 
-export interface GameElementRegistration {
+export enum GameSoundEvent {
+    LAND = "land",
+    JUMP = "jump",
+    FALL = "fall",
+    FOOTSTEP = "footstep",
+    COLLIDE = "collide",
+}
+
+export enum GameSurface {
+    DEFAULT = "default",
+    WOOD = "wood",
+    METAL = "metal",
+    GLASS = "glass",
+    CARPET = "carpet",
+    CONCRETE = "concrete",
+    GRASS = "grass",
+    SNOW = "snow",
+    BELL = "bell",
+    PLATE = "plate",
+}
+
+export interface GameSoundSupport {
+    element: HTMLElement;
+    type: GameElement;
+    rect: GameRect;
+    surface: GameSurface;
+}
+
+export interface GameSoundPayload {
+    type: GameSoundEvent;
+    dt: number;
+    position: { x: number; y: number };
+    velocity: { x: number; y: number };
+    intensity?: number;
+    support: GameSoundSupport | null;
+    meta?: Record<string, unknown>;
+}
+
+export type GameSoundHandler = (event: GameSoundEvent, payload: GameSoundPayload) => void;
+
+export interface GameSoundSpec {
+    src: string;
+    volume?: number;
+    playbackRate?: number;
+}
+
+export type GameSoundDefinition =
+    | string
+    | HTMLAudioElement
+    | GameSoundSpec
+    | ((event: GameSoundEvent, payload: GameSoundPayload) => void);
+
+export type GameSoundMap = Partial<Record<GameSoundEvent, GameSoundDefinition>>;
+
+export interface GameOptions {
+    footstepInterval?: number;
+    onSound?: GameSoundHandler;
+    soundMap?: GameSoundMap;
+}
+
+export type GameElementRegistration = {
     type: GameElement;
     collisionSides?: CollisionSides;
     collisionMask?: CollisionMask;
     passThrough?: PassThroughConfig;
     solid?: boolean;
     metadata?: Record<string, unknown>;
+    surface?: GameSurface;
+};
+
+const DEFAULT_FOOTSTEP_INTERVAL = 0.32;
+const NOOP_SOUND: GameSoundHandler = () => { };
+
+type ResolvedSound = GameSoundHandler | HTMLAudioElement;
+
+export function createGameSoundHandler(
+    map: GameSoundMap,
+    options: { preload?: boolean } = {},
+): GameSoundHandler {
+    const audioCache = new Map<GameSoundEvent, HTMLAudioElement>();
+    const { preload = true } = options;
+
+    const resolveAudio = (event: GameSoundEvent, spec: GameSoundDefinition): ResolvedSound => {
+        if (typeof spec === "function") return spec as GameSoundHandler;
+        if (isAudioElement(spec)) return spec;
+        if (isSoundSpec(spec)) {
+            let audio = audioCache.get(event);
+            if (!audio) {
+                audio = new Audio(spec.src);
+                audioCache.set(event, audio);
+            }
+            if (spec.volume !== undefined) audio.volume = spec.volume;
+            if (spec.playbackRate !== undefined) audio.playbackRate = spec.playbackRate;
+            return audio;
+        }
+        let audio = audioCache.get(event);
+        if (!audio) {
+            audio = new Audio(spec);
+            audioCache.set(event, audio);
+        }
+        return audio;
+    };
+
+    if (preload) {
+        for (const [eventKey, spec] of Object.entries(map) as [GameSoundEvent, GameSoundDefinition][]) {
+            if (!spec) continue;
+            resolveAudio(eventKey, spec);
+        }
+    }
+
+    return (event, payload) => {
+        const definition = map[event];
+        if (!definition) return;
+
+        const resolved = resolveAudio(event, definition);
+        playResolvedSound(resolved, payload);
+    };
+}
+
+function isAudioElement(definition: GameSoundDefinition): definition is HTMLAudioElement {
+    return typeof HTMLAudioElement !== "undefined" && definition instanceof HTMLAudioElement;
+}
+
+function isSoundSpec(definition: GameSoundDefinition): definition is GameSoundSpec {
+    return (
+        typeof definition === "object" &&
+        definition !== null &&
+        !isAudioElement(definition) &&
+        "src" in definition &&
+        typeof (definition as GameSoundSpec).src === "string"
+    );
+}
+
+function playResolvedSound(resolved: ResolvedSound, payload: GameSoundPayload) {
+    if (typeof resolved === "function") {
+        resolved(payload.type, payload);
+        return;
+    }
+
+    try {
+        resolved.currentTime = 0;
+        const playPromise = resolved.play();
+        if (playPromise && typeof playPromise.catch === "function") {
+            playPromise.catch(() => {});
+        }
+    } catch {
+        // ignore playback errors
+    }
 }
 
 interface RegisteredElement {
@@ -132,6 +273,17 @@ interface SupportInfo {
     entry: RegisteredElement;
     segmentIndex: number;
 }
+
+interface HorizontalCollision {
+    support: SupportInfo | null;
+    direction: "left" | "right";
+    speed: number;
+}
+
+type EmitSoundExtras = Partial<Omit<GameSoundPayload, "type" | "support" | "dt">> & {
+    support?: SupportInfo | null;
+    dt?: number;
+};
 
 interface ControlsState {
     left: boolean;
@@ -169,22 +321,31 @@ export class MarioGame {
 
     private disposables = new Set<() => void>();
     private lastState: PlayerState | null = null;
+    private lastDt = 0;
 
     private elementRegistry = new Map<HTMLElement, RegisteredElement>();
     private world = { width: 0, height: 0, groundTop: 0 };
     private dirtyElements = new Set<HTMLElement>();
     private worldDirty = true;
     private currentSupport: SupportInfo | null = null;
+    private options = { footstepInterval: DEFAULT_FOOTSTEP_INTERVAL };
+    private soundHandler: GameSoundHandler = NOOP_SOUND;
+    private hasSoundHandler = false;
+    private soundState = {
+        footstepTimer: 0,
+    };
 
     public element: { [key in GameElement]: Set<HTMLElement> } = {
         [GameElement.PLATFORM]: new Set(),
     };
 
-    constructor(private readonly playerEl: HTMLImageElement) {
+    constructor(private readonly playerEl: HTMLImageElement, options: GameOptions = {}) {
         this.playerEl.style.position = "absolute";
         this.playerEl.style.top = "0px";
         this.playerEl.style.left = "0px";
         this.playerEl.src = Man.STANDING;
+
+        this.configureOptions(options);
 
         this.measureWorld();
         this.worldDirty = false;
@@ -199,16 +360,20 @@ export class MarioGame {
     }
 
     addElement(dom: HTMLElement, options: GameElementRegistration) {
-        const behavior = this.resolveBehavior(options);
-        const measurements = measureElement(dom);
-        const entry: RegisteredElement = {
-            element: dom,
-            type: options.type,
-            behavior,
-            config: options,
-            rect: measurements.rect,
-            segments: measurements.segments,
-        };
+    const resolvedConfig: GameElementRegistration = {
+        ...options,
+        surface: options.surface ?? GameSurface.DEFAULT,
+    };
+    const behavior = this.resolveBehavior(resolvedConfig);
+    const measurements = measureElement(dom);
+    const entry: RegisteredElement = {
+        element: dom,
+        type: options.type,
+        behavior,
+        config: resolvedConfig,
+        rect: measurements.rect,
+        segments: measurements.segments,
+    };
 
         this.elementRegistry.set(dom, entry);
         this.element[options.type].add(dom);
@@ -256,6 +421,36 @@ export class MarioGame {
             collisionMask,
             passThrough,
         };
+    }
+
+    updateOptions(options: GameOptions) {
+        this.configureOptions(options);
+    }
+
+    private configureOptions(options: GameOptions = {}) {
+        if (options.footstepInterval !== undefined) {
+            const interval = Math.max(0.05, options.footstepInterval);
+            this.options.footstepInterval = interval;
+        }
+
+        if (options.onSound !== undefined) {
+            if (options.onSound) {
+                this.soundHandler = options.onSound;
+                this.hasSoundHandler = true;
+            } else {
+                this.soundHandler = NOOP_SOUND;
+                this.hasSoundHandler = false;
+            }
+        } else if (options.soundMap !== undefined) {
+            if (options.soundMap) {
+                this.soundHandler = createGameSoundHandler(options.soundMap);
+                this.hasSoundHandler = true;
+            } else {
+                this.soundHandler = NOOP_SOUND;
+                this.hasSoundHandler = false;
+            }
+        }
+
     }
 
     private markElementDirty(element: HTMLElement) {
@@ -330,6 +525,10 @@ export class MarioGame {
 
     tick = (frameData: FrameData) => {
         const dt = Math.min(frameData.delta / 1000, MAX_FRAME_STEP);
+        this.lastDt = dt;
+
+        const prevGrounded = this.grounded;
+        const prevSupport = this.currentSupport;
 
         if (this.worldDirty) {
             this.measureWorld();
@@ -340,12 +539,18 @@ export class MarioGame {
         this.handleInput(dt);
         this.handleJump();
         this.applyGravity(dt);
+        const vyBeforeResolve = this.vy;
 
         const solids = this.getSolidElements();
-        this.resolveHorizontalMotion(dt, solids);
+        const horizontalCollision = this.resolveHorizontalMotion(dt, solids);
         this.resolveVerticalMotion(dt, solids);
 
+        const beforeClampX = this.x;
         this.clampPositionToWorld();
+        const hitBounds = beforeClampX !== this.x ? (this.x <= 0 ? "left" : "right") : null;
+
+        this.updateSoundState(prevGrounded, prevSupport, dt, vyBeforeResolve, horizontalCollision, hitBounds);
+
         this.layOut();
     };
 
@@ -374,8 +579,11 @@ export class MarioGame {
 
     private handleJump() {
         if (this.jumpQueued && this.grounded) {
+            const jumpSupport = this.currentSupport;
             this.vy = -GAME.JUMP_VELOCITY;
             this.grounded = false;
+            const intensity = clamp(Math.abs(this.vx) / GAME.MAX_RUN_SPEED, 0.3, 1);
+            this.emitSound(GameSoundEvent.JUMP, { support: jumpSupport, intensity });
             this.currentSupport = null;
             this.jumpQueued = false;
         }
@@ -399,74 +607,97 @@ export class MarioGame {
         }
     }
 
-    private resolveHorizontalMotion(dt: number, solids: RegisteredElement[]) {
-        if (this.vx === 0) return;
+    private resolveHorizontalMotion(dt: number, solids: RegisteredElement[]): HorizontalCollision | null {
+        if (this.vx === 0) return null;
 
         const nextX = this.x + this.vx * dt;
         const playerTop = this.y;
         const playerBottom = this.y + GAME.CHARACTER_HEIGHT;
+        const speedBefore = Math.abs(this.vx);
 
         if (this.vx > 0) {
             let resolvedX = nextX;
             let collision = false;
+            let collisionSupport: SupportInfo | null = null;
 
             for (const entry of solids) {
                 const { behavior } = entry;
                 if (!(behavior.collisionMask & COLLISION.LEFT)) continue;
                 if (behavior.passThrough.rightward) continue;
 
-                for (const segment of entry.segments) {
+                entry.segments.forEach((segment, segmentIndex) => {
                     const overlapY = overlapAmount(playerTop, playerBottom, segment.y, segment.y + segment.height);
-                    if (overlapY < MIN_SIDE_OVERLAP) continue;
+                    if (overlapY < MIN_SIDE_OVERLAP) return;
 
                     const obstacleLeft = segment.x;
                     const previousRight = this.x + GAME.CHARACTER_WIDTH;
                     const futureRight = nextX + GAME.CHARACTER_WIDTH;
 
                     if (previousRight <= obstacleLeft && futureRight > obstacleLeft) {
-                        resolvedX = Math.min(resolvedX, obstacleLeft - GAME.CHARACTER_WIDTH);
+                        const candidate = obstacleLeft - GAME.CHARACTER_WIDTH;
+                        if (!collision || candidate < resolvedX) {
+                            resolvedX = candidate;
+                            collisionSupport = { entry, segmentIndex };
+                        }
                         collision = true;
                     }
-                }
+                });
             }
 
             if (collision) {
                 this.x = resolvedX;
                 this.vx = 0;
-            } else {
-                this.x = nextX;
-            }
-        } else {
-            let resolvedX = nextX;
-            let collision = false;
-
-            for (const entry of solids) {
-                const { behavior } = entry;
-                if (!(behavior.collisionMask & COLLISION.RIGHT)) continue;
-                if (behavior.passThrough.leftward) continue;
-
-                for (const segment of entry.segments) {
-                    const overlapY = overlapAmount(playerTop, playerBottom, segment.y, segment.y + segment.height);
-                    if (overlapY < MIN_SIDE_OVERLAP) continue;
-
-                    const obstacleRight = segment.x + segment.width;
-                    const previousLeft = this.x;
-                    const futureLeft = nextX;
-
-                    if (previousLeft >= obstacleRight && futureLeft < obstacleRight) {
-                        resolvedX = Math.max(resolvedX, obstacleRight);
-                        collision = true;
-                    }
-                }
+                return {
+                    support: collisionSupport,
+                    direction: "right",
+                    speed: speedBefore,
+                };
             }
 
-            if (collision) {
-                this.x = resolvedX;
-                this.vx = 0;
-            } else {
-                this.x = nextX;
-            }
+            this.x = nextX;
+            return null;
         }
+
+        let resolvedX = nextX;
+        let collision = false;
+        let collisionSupport: SupportInfo | null = null;
+
+        for (const entry of solids) {
+            const { behavior } = entry;
+            if (!(behavior.collisionMask & COLLISION.RIGHT)) continue;
+            if (behavior.passThrough.leftward) continue;
+
+            entry.segments.forEach((segment, segmentIndex) => {
+                const overlapY = overlapAmount(playerTop, playerBottom, segment.y, segment.y + segment.height);
+                if (overlapY < MIN_SIDE_OVERLAP) return;
+
+                const obstacleRight = segment.x + segment.width;
+                const previousLeft = this.x;
+                const futureLeft = nextX;
+
+                if (previousLeft >= obstacleRight && futureLeft < obstacleRight) {
+                    const candidate = obstacleRight;
+                    if (!collision || candidate > resolvedX) {
+                        resolvedX = candidate;
+                        collisionSupport = { entry, segmentIndex };
+                    }
+                    collision = true;
+                }
+            });
+        }
+
+        if (collision) {
+            this.x = resolvedX;
+            this.vx = 0;
+            return {
+                support: collisionSupport,
+                direction: "left",
+                speed: speedBefore,
+            };
+        }
+
+        this.x = nextX;
+        return null;
     }
 
     private resolveVerticalMotion(dt: number, solids: RegisteredElement[]) {
@@ -561,6 +792,86 @@ export class MarioGame {
         if (!grounded) {
             this.currentSupport = null;
         }
+    }
+
+    private updateSoundState(
+        prevGrounded: boolean,
+        prevSupport: SupportInfo | null,
+        dt: number,
+        vyBeforeResolve: number,
+        horizontalCollision: HorizontalCollision | null,
+        boundaryCollision: "left" | "right" | null,
+    ) {
+        if (!this.hasSoundHandler) return;
+
+        if (!prevGrounded && this.grounded && this.currentSupport) {
+            const intensity = clamp(Math.abs(vyBeforeResolve) / GAME.JUMP_VELOCITY, 0.2, 1);
+            this.emitSound(GameSoundEvent.LAND, { support: this.currentSupport, intensity });
+        } else if (prevGrounded && !this.grounded) {
+            const intensity = clamp(Math.abs(vyBeforeResolve) / GAME.TERMINAL_VELOCITY, 0.1, 1);
+            this.emitSound(GameSoundEvent.FALL, { support: prevSupport, intensity });
+            this.soundState.footstepTimer = 0;
+        }
+
+        if (horizontalCollision) {
+            const intensity = clamp(horizontalCollision.speed / GAME.MAX_RUN_SPEED, 0.1, 1);
+            this.emitSound(GameSoundEvent.COLLIDE, {
+                support: horizontalCollision.support,
+                intensity,
+                meta: { axis: "x", direction: horizontalCollision.direction },
+            });
+        } else if (boundaryCollision) {
+            const intensity = clamp(Math.abs(this.vx) / GAME.MAX_RUN_SPEED, 0.2, 1);
+            this.emitSound(GameSoundEvent.COLLIDE, {
+                support: null,
+                intensity,
+                meta: { axis: "x", direction: boundaryCollision, kind: "boundary" },
+            });
+        }
+
+        if (this.grounded && Math.abs(this.vx) >= GAME.WALK_THRESHOLD) {
+            const speedRatio = clamp(Math.abs(this.vx) / GAME.MAX_RUN_SPEED, 0, 1);
+            const cadence = 0.5 + speedRatio;
+            this.soundState.footstepTimer += dt * cadence;
+            if (this.soundState.footstepTimer >= this.options.footstepInterval) {
+                this.soundState.footstepTimer = 0;
+                this.emitSound(GameSoundEvent.FOOTSTEP, {
+                    support: this.currentSupport,
+                    intensity: speedRatio,
+                    meta: { speed: Math.abs(this.vx) },
+                });
+            }
+        } else {
+            this.soundState.footstepTimer = 0;
+        }
+    }
+
+    private emitSound(event: GameSoundEvent, extras: EmitSoundExtras = {}) {
+        if (!this.hasSoundHandler) return;
+
+        const supportInfo = extras.support ?? this.currentSupport;
+        let supportPayload: GameSoundSupport | null = null;
+        if (supportInfo) {
+            const segment = supportInfo.entry.segments[supportInfo.segmentIndex] ?? supportInfo.entry.rect;
+            supportPayload = {
+                element: supportInfo.entry.element,
+                type: supportInfo.entry.type,
+                rect: segment,
+                surface: supportInfo.entry.config.surface ?? GameSurface.DEFAULT,
+            };
+        }
+
+        const payload: GameSoundPayload = {
+            type: event,
+            dt: extras.dt ?? this.lastDt,
+            position: extras.position ?? { x: this.x, y: this.y },
+            velocity: extras.velocity ?? { x: this.vx, y: this.vy },
+            intensity: extras.intensity ?? 1,
+            meta: extras.meta,
+            support: supportPayload,
+        };
+
+        this.soundHandler(event, payload);
     }
 
     private isStandingOnSupport(solids: RegisteredElement[]) {

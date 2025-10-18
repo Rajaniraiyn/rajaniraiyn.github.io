@@ -10,7 +10,7 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tooltip, TooltipPopup, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useTheme } from '@/contexts/theme'
 import { useGameElement } from '@/hooks/use-game-element'
-import { GameElement } from '@/lib/mario-game'
+import { GameElement, GameSurface } from '@/lib/mario-game'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { BuildingIcon, ExternalLink, GithubIcon } from 'lucide-react'
 import type { ComponentProps, ReactNode } from 'react'
@@ -22,17 +22,13 @@ export const Route = createFileRoute('/')({
 })
 
 function RouteComponent() {
-    const workExperienceItemsRef = useGameElement<HTMLDivElement>({
-        type: GameElement.PLATFORM,
-    })
     const workExperienceTitleRef = useGameElement<HTMLHeadingElement>({
         type: GameElement.PLATFORM,
-    })
-    const projectsItemsRef = useGameElement<HTMLDivElement>({
-        type: GameElement.PLATFORM,
+        surface: GameSurface.WOOD,
     })
     const projectsTitleRef = useGameElement<HTMLHeadingElement>({
         type: GameElement.PLATFORM,
+        surface: GameSurface.WOOD,
     })
 
     return (
@@ -44,7 +40,7 @@ function RouteComponent() {
             </section>
             <section className='space-y-4 px-2'>
                 <h2 ref={workExperienceTitleRef} className='text-2xl font-bold font-departure-mono uppercase w-fit'>Work Experience</h2>
-                <Accordion render={<div ref={workExperienceItemsRef} />} className='flex flex-col gap-4 md:px-5' multiple>
+                <Accordion className='flex flex-col gap-4 md:px-5' multiple>
                     {/* <WorkExperience
                         title="Desktop Application Developer"
                         company="Abacus"
@@ -74,7 +70,7 @@ function RouteComponent() {
             </section>
             <section className='space-y-4 px-2'>
                 <h2 ref={projectsTitleRef} className='text-2xl font-bold font-departure-mono uppercase w-fit'>Projects</h2>
-                <Accordion render={<div ref={projectsItemsRef} />} className='flex flex-col gap-4 md:px-5' multiple>
+                <Accordion className='flex flex-col gap-4 md:px-5' multiple>
                     <Project
                         name="React Alien Signals"
                         github="https://github.com/Rajaniraiyn/react-alien-signals"
@@ -249,6 +245,7 @@ function HighlightedTextWithPreview({ children, previewUrl }: { children: ReactN
     const registerPlatform = useGameElement<HTMLElement>({
         type: GameElement.PLATFORM,
         collisionSides: { top: true },
+        surface: GameSurface.CARPET,
     })
     const attachHighlighterRef = useCallback((instance: TextHighlighterRef | null) => {
         registerPlatform(instance?.componentElement ?? null)
@@ -279,8 +276,12 @@ function HighlightedTextWithPreview({ children, previewUrl }: { children: ReactN
 }
 
 function WorkExperience({ title, company, companyUrl, icon, startDate, endDate }: { title: string, company: string, companyUrl: string, icon: string, startDate: string, endDate: string }) {
+    const platformRef = useGameElement<HTMLDivElement>({
+        type: GameElement.PLATFORM,
+        surface: GameSurface.CONCRETE,
+    })
     return (
-        <Card className='p-2 gap-1 last:border-b-1'>
+        <Card ref={platformRef} className='p-2 gap-1 last:border-b-1'>
             <CardHeader className="p-0 flex justify-between flex-row flex-wrap items-start gap-2">
                 <Avatar className="sm:size-12 rounded-xl bg-transparent">
                     <AvatarImage src={icon} alt={company} />
@@ -307,12 +308,13 @@ function WorkExperience({ title, company, companyUrl, icon, startDate, endDate }
 function Project({ name, github, website, startDate, endDate, description, details }: { name: string, github: string, website: string, startDate: string, endDate: string, description: string, details: string[] }) {
     const platformRef = useGameElement<HTMLDivElement>({
         type: GameElement.PLATFORM,
+        surface: GameSurface.WOOD,
     })
 
     return (
-        <AccordionItem className='px-2 py-1 gap-1 rounded border border-border/60 bg-card/60 last:border-b-1'>
+        <AccordionItem render={<div ref={platformRef} />} className='px-2 py-1 gap-1 rounded border border-border/60 bg-card/60 last:border-b-1'>
             <AccordionTrigger className="p-0 flex flex-row justify-between items-center [&[data-panel-open]_svg[data-chevron]]:rotate-90 group">
-                <div ref={platformRef} className="flex items-center gap-3">
+                <div className="flex items-center gap-3">
                     <div className="flex-1">
                         <div className="flex items-center gap-2">
                             <span className="text-base font-semibold">{name}</span>
