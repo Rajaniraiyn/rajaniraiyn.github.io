@@ -1,4 +1,5 @@
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { GameProvider } from '@/contexts/game'
 import { MotionProvider } from '@/contexts/motion'
 import { TabBarProvider } from '@/contexts/tabbar'
 import { ThemeProvider } from '@/contexts/theme'
@@ -15,7 +16,9 @@ export function getRouter() {
             <ThemeProvider>
                 <TooltipProvider>
                     <MotionProvider>
-                        {children}
+                        <GameProvider>
+                            {children}
+                        </GameProvider>
                     </MotionProvider>
                 </TooltipProvider>
                 <TabBarProvider />

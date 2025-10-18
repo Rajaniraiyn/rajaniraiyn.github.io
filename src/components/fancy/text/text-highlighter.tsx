@@ -62,6 +62,11 @@ type TextHighlighterProps = {
 
 export type TextHighlighterRef = {
   /**
+   * The component element
+   */
+  componentElement: HTMLElement | null;
+
+  /**
    * Trigger the highlight animation
    * @param direction - Optional direction override for this animation
    */
@@ -118,6 +123,7 @@ export const TextHighlighter = forwardRef<
         }
         setIsAnimating(true)
       },
+      componentElement: componentRef.current,
       reset: () => setIsAnimating(false),
     }))
 

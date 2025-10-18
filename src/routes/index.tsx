@@ -1,23 +1,40 @@
+import santaBrowserFaviconSrc from '@/assets/images/santabrowser-favicon.svg'
 import gameTowerPixelArtSrc from '@/assets/wallpapers/game-tower.jpeg'
 import naturePixelArtSrc from '@/assets/wallpapers/nature.jpeg'
-import santaBrowserFaviconSrc from '@/assets/images/santabrowser-favicon.svg'
-import { TextHighlighter } from "@/components/fancy/text/text-highlighter"
+import { Game } from '@/components/cheats/game'
+import { TextHighlighter, type TextHighlighterRef } from "@/components/fancy/text/text-highlighter"
 import { Header } from '@/components/header'
 import { Accordion, AccordionItem, AccordionPanel, AccordionTrigger } from '@/components/ui/accordion'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tooltip, TooltipPopup, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useTheme } from '@/contexts/theme'
+import { useGameElement } from '@/hooks/use-game-element'
+import { GameElement } from '@/lib/mario-game'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { BuildingIcon, ExternalLink, GithubIcon } from 'lucide-react'
+import type { ComponentProps, ReactNode } from 'react'
+import { useCallback } from 'react'
 import type { Transition } from "motion"
-import { Game } from '@/components/cheats/game'
 
 export const Route = createFileRoute('/')({
     component: RouteComponent,
 })
 
 function RouteComponent() {
+    const workExperienceItemsRef = useGameElement<HTMLDivElement>({
+        type: GameElement.PLATFORM,
+    })
+    const workExperienceTitleRef = useGameElement<HTMLHeadingElement>({
+        type: GameElement.PLATFORM,
+    })
+    const projectsItemsRef = useGameElement<HTMLDivElement>({
+        type: GameElement.PLATFORM,
+    })
+    const projectsTitleRef = useGameElement<HTMLHeadingElement>({
+        type: GameElement.PLATFORM,
+    })
+
     return (
         <div className='space-y-10 scroll-pt-1'>
             <Header className='sticky inset-0 bottom-auto z-50 mb-0' />
@@ -26,8 +43,8 @@ function RouteComponent() {
                 <About />
             </section>
             <section className='space-y-4 px-2'>
-                <h2 className='text-2xl font-bold font-departure-mono uppercase'>Work Experience</h2>
-                <Accordion className='flex flex-col gap-4 md:px-5' multiple>
+                <h2 ref={workExperienceTitleRef} className='text-2xl font-bold font-departure-mono uppercase w-fit'>Work Experience</h2>
+                <Accordion render={<div ref={workExperienceItemsRef} />} className='flex flex-col gap-4 md:px-5' multiple>
                     {/* <WorkExperience
                         title="Desktop Application Developer"
                         company="Abacus"
@@ -56,8 +73,8 @@ function RouteComponent() {
                 </Accordion>
             </section>
             <section className='space-y-4 px-2'>
-                <h2 className='text-2xl font-bold font-departure-mono uppercase'>Projects</h2>
-                <Accordion className='flex flex-col gap-4 md:px-5' multiple>
+                <h2 ref={projectsTitleRef} className='text-2xl font-bold font-departure-mono uppercase w-fit'>Projects</h2>
+                <Accordion render={<div ref={projectsItemsRef} />} className='flex flex-col gap-4 md:px-5' multiple>
                     <Project
                         name="React Alien Signals"
                         github="https://github.com/Rajaniraiyn/react-alien-signals"
@@ -227,8 +244,15 @@ function About() {
     )
 }
 
-function HighlightedTextWithPreview({ children, previewUrl }: { children: React.ReactNode, previewUrl?: string }) {
+function HighlightedTextWithPreview({ children, previewUrl }: { children: ReactNode, previewUrl?: string }) {
     const { resolvedTheme } = useTheme();
+    const registerPlatform = useGameElement<HTMLElement>({
+        type: GameElement.PLATFORM,
+        collisionSides: { top: true },
+    })
+    const attachHighlighterRef = useCallback((instance: TextHighlighterRef | null) => {
+        registerPlatform(instance?.componentElement ?? null)
+    }, [registerPlatform])
 
     const highlighterProps = {
         className: "rounded-sm px-px mix-blend-difference",
@@ -237,9 +261,9 @@ function HighlightedTextWithPreview({ children, previewUrl }: { children: React.
             : ["hsl(45, 80%, 85%)", "hsl(35, 90%, 90%)", "hsl(40, 85%, 95%)"],
         useInViewOptions: { once: true, initial: true, amount: 0.1 },
         transition: { type: "spring", duration: 0.8, delay: 0.1, bounce: 0 } satisfies Transition,
-    } satisfies Omit<React.ComponentProps<typeof TextHighlighter>, "children">;
+    } satisfies Omit<ComponentProps<typeof TextHighlighter>, "children">;
 
-    const highlighted = <TextHighlighter {...highlighterProps} data-game="floor">{children}</TextHighlighter>;
+    const highlighted = <TextHighlighter ref={attachHighlighterRef} {...highlighterProps}>{children}</TextHighlighter>;
 
     // for now, we skip the tooltip for all text
     if (!previewUrl || true) {
@@ -281,10 +305,14 @@ function WorkExperience({ title, company, companyUrl, icon, startDate, endDate }
 }
 
 function Project({ name, github, website, startDate, endDate, description, details }: { name: string, github: string, website: string, startDate: string, endDate: string, description: string, details: string[] }) {
+    const platformRef = useGameElement<HTMLDivElement>({
+        type: GameElement.PLATFORM,
+    })
+
     return (
         <AccordionItem className='px-2 py-1 gap-1 rounded border border-border/60 bg-card/60 last:border-b-1'>
             <AccordionTrigger className="p-0 flex flex-row justify-between items-center [&[data-panel-open]_svg[data-chevron]]:rotate-90 group">
-                <div className="flex items-center gap-3">
+                <div ref={platformRef} className="flex items-center gap-3">
                     <div className="flex-1">
                         <div className="flex items-center gap-2">
                             <span className="text-base font-semibold">{name}</span>
