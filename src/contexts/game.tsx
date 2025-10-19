@@ -1,3 +1,4 @@
+import backgroundMusicSrc from "@/assets/audio/8-bit-background.mp3";
 import { MarioGame, createGameSoundHandler, type GameElementRegistration, type GameOptions, type GameSoundHandler } from "@/lib/mario-game";
 import { createDefaultMarioSoundHandler } from "@/lib/mario-soundscape";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
@@ -9,6 +10,7 @@ export interface GameContextType {
     game: MarioGame | null;
     isRunning: boolean;
     soundEnabled: boolean;
+    musicEnabled: boolean;
     addPlayer: (playerEl: HTMLImageElement) => MarioGame;
     addElement: (dom: HTMLElement, config: GameElementRegistration) => (() => void) | null;
     updateOptions: (options: GameOptions) => void;
@@ -16,6 +18,7 @@ export interface GameContextType {
     startGame: () => void;
     stopGame: () => void;
     toggleSound: () => void;
+    toggleMusic: () => void;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -24,6 +27,8 @@ export function GameProvider({ children, options }: { children: React.ReactNode;
     const gameRef = useRef<MarioGame | null>(null);
     const [isRunning, setIsRunning] = useState(false);
     const [soundEnabled, setSoundEnabled] = useState(true);
+    const [musicEnabled, setMusicEnabled] = useState(true);
+    const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
     const registeredElements = useRef(
         new Map<HTMLElement, { options: GameElementRegistration; detach: (() => void) | null }>(),
     );
@@ -117,7 +122,14 @@ export function GameProvider({ children, options }: { children: React.ReactNode;
         if (!gameRef.current) return;
         gameRef.current.start();
         setIsRunning(true);
-    }, []);
+
+        // Start background music if enabled
+        if (musicEnabled && backgroundMusicRef.current) {
+            backgroundMusicRef.current.play().catch(() => {
+                // Ignore play errors (user interaction required)
+            });
+        }
+    }, [musicEnabled]);
 
     const stopGame = useCallback(() => {
         if (gameRef.current) {
@@ -125,6 +137,12 @@ export function GameProvider({ children, options }: { children: React.ReactNode;
             gameRef.current = null;
         }
         setIsRunning(false);
+
+        // Stop background music
+        if (backgroundMusicRef.current) {
+            backgroundMusicRef.current.pause();
+            backgroundMusicRef.current.currentTime = 0;
+        }
     }, []);
 
     const toggleSound = useCallback(() => {
@@ -143,11 +161,44 @@ export function GameProvider({ children, options }: { children: React.ReactNode;
         });
     }, []);
 
+    const toggleMusic = useCallback(() => {
+        setMusicEnabled(prev => {
+            const newValue = !prev;
+            // Control background music
+            if (backgroundMusicRef.current) {
+                if (newValue && isRunning) {
+                    backgroundMusicRef.current.play().catch(() => {
+                        // Ignore play errors (user interaction required)
+                    });
+                } else {
+                    backgroundMusicRef.current.pause();
+                }
+            }
+            return newValue;
+        });
+    }, [isRunning]);
+
+    // Initialize background music
+    useEffect(() => {
+        if (!backgroundMusicRef.current) {
+            backgroundMusicRef.current = new Audio(backgroundMusicSrc);
+            backgroundMusicRef.current.loop = true;
+            backgroundMusicRef.current.volume = 0.3; // Low volume for background
+        }
+
+        return () => {
+            if (backgroundMusicRef.current) {
+                backgroundMusicRef.current.pause();
+                backgroundMusicRef.current = null;
+            }
+        };
+    }, []);
+
     const updateOptions = applyOptions;
     const game = gameRef.current;
 
     return (
-        <GameContext.Provider value={{ game, isRunning, soundEnabled, addPlayer, addElement, updateOptions, options: currentOptions, startGame, stopGame, toggleSound }}>
+        <GameContext.Provider value={{ game, isRunning, soundEnabled, musicEnabled, addPlayer, addElement, updateOptions, options: currentOptions, startGame, stopGame, toggleSound, toggleMusic }}>
             {children}
         </GameContext.Provider>
     );

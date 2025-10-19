@@ -2,13 +2,14 @@ import { useGame } from "@/contexts/game";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardPanel, CardFooter } from "@/components/ui/card";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
-import { Square, Gamepad2, Volume2, VolumeX, Play } from "lucide-react";
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipPopup } from "@/components/ui/tooltip";
+import { Square, Gamepad2, Volume2, VolumeX, Play, Music } from "lucide-react";
 import { useNavigate } from '@tanstack/react-router';
 import { useEffect, useRef, useCallback, useState } from "react";
 
 export function Game() {
     const characterRef = useRef<HTMLImageElement>(null);
-    const { addPlayer, isRunning, startGame, stopGame, soundEnabled, toggleSound } = useGame();
+    const { addPlayer, isRunning, startGame, stopGame, soundEnabled, musicEnabled, toggleSound, toggleMusic } = useGame();
     const navigate = useNavigate();
     const [showInstructions, setShowInstructions] = useState(true);
 
@@ -121,30 +122,56 @@ export function Game() {
                 <>
                     {/* Top Controls */}
                     <div className="fixed top-4 right-4 z-50 flex gap-2">
-                        {/* Sound Toggle */}
-                        <Button
-                            onClick={toggleSound}
-                            variant="outline"
-                            size="sm"
-                            className="bg-background/95 backdrop-blur-sm border-border/50 shadow-lg hover:bg-accent transition-colors"
-                        >
-                            {soundEnabled ? (
-                                <Volume2 className="size-4" />
-                            ) : (
-                                <VolumeX className="size-4" />
-                            )}
-                        </Button>
+                        <TooltipProvider delay={0}>
+                            {/* Music Toggle */}
+                            <Tooltip>
+                                <TooltipTrigger>
+                                    <Button
+                                        onClick={toggleMusic}
+                                        variant="outline"
+                                        size="sm"
+                                        className="bg-background/95 backdrop-blur-sm border-border/50 shadow-lg hover:bg-accent transition-colors"
+                                    >
+                                        <Music className="size-4" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipPopup>
+                                    {musicEnabled ? 'Disable Background Music' : 'Enable Background Music'}
+                                </TooltipPopup>
+                            </Tooltip>
 
-                        {/* Stop Button */}
-                        <Button
-                            onClick={handleStopGame}
-                            variant="destructive"
-                            size="sm"
-                            className="bg-destructive/95 backdrop-blur-sm shadow-lg hover:bg-destructive/90 transition-colors"
-                        >
-                            <Square className="size-4 mr-2" />
-                            Stop Game
-                        </Button>
+                            {/* Sound Toggle */}
+                            <Tooltip>
+                                <TooltipTrigger>
+                                    <Button
+                                        onClick={toggleSound}
+                                        variant="outline"
+                                        size="sm"
+                                        className="bg-background/95 backdrop-blur-sm border-border/50 shadow-lg hover:bg-accent transition-colors"
+                                    >
+                                        {soundEnabled ? (
+                                            <Volume2 className="size-4" />
+                                        ) : (
+                                            <VolumeX className="size-4" />
+                                        )}
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipPopup>
+                                    {soundEnabled ? 'Disable Game Sounds' : 'Enable Game Sounds'}
+                                </TooltipPopup>
+                            </Tooltip>
+
+                            {/* Stop Button */}
+                            <Button
+                                onClick={handleStopGame}
+                                variant="destructive"
+                                size="sm"
+                                className="bg-destructive/95 backdrop-blur-sm shadow-lg hover:bg-destructive/90 transition-colors"
+                            >
+                                <Square className="size-4 mr-2" />
+                                Stop Game
+                            </Button>
+                        </TooltipProvider>
                     </div>
 
                     {/* Bottom Controls Hint */}
