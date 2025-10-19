@@ -283,6 +283,6 @@ function playVariant(variant: SurfaceSoundVariant, payload: Parameters<GameSound
     audio.playbackRate = randomBetween(variant.playbackRate);
     const playPromise = audio.play();
     if (playPromise && typeof playPromise.catch === "function") {
-        playPromise.catch(() => {});
+        playPromise.catch(() => { });
     }
 }

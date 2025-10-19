@@ -59,6 +59,7 @@ export function GameProvider({ children, options }: { children: React.ReactNode;
             collisionSides: config.collisionSides ? { ...config.collisionSides } : undefined,
             passThrough: config.passThrough ? { ...config.passThrough } : undefined,
             metadata: config.metadata ? { ...config.metadata } : undefined,
+            events: config.events ? { ...config.events } : undefined,
         };
 
         const existing = registeredElements.current.get(dom);

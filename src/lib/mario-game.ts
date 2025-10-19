@@ -170,6 +170,21 @@ export interface GameOptions {
     soundMap?: GameSoundMap;
 }
 
+export type GameElementEventPayload = {
+    element: HTMLElement;
+    direction?: "left" | "right" | "top" | "bottom";
+    speed?: number;
+    metadata?: Record<string, unknown>;
+};
+
+export type GameElementEventHandler = (payload: GameElementEventPayload) => void;
+
+export type GameElementEvents = {
+    onPlayerEnter?: GameElementEventHandler;
+    onPlayerLeave?: GameElementEventHandler;
+    onPlayerCollide?: GameElementEventHandler;
+};
+
 export type GameElementRegistration = {
     type: GameElement;
     collisionSides?: CollisionSides;
@@ -178,6 +193,7 @@ export type GameElementRegistration = {
     solid?: boolean;
     metadata?: Record<string, unknown>;
     surface?: GameSurface;
+    events?: GameElementEvents;
 };
 
 const DEFAULT_FOOTSTEP_INTERVAL = 0.32;
@@ -409,6 +425,37 @@ export class MarioGame {
         return cleanup;
     }
 
+    private emitElementEvent(eventType: keyof GameElementEvents, element: HTMLElement, payload: Omit<GameElementEventPayload, 'element'> = {}) {
+        const entry = this.elementRegistry.get(element);
+        if (!entry?.config.events?.[eventType]) return;
+
+        const eventPayload: GameElementEventPayload = {
+            element,
+            metadata: entry.config.metadata,
+            ...payload,
+        };
+
+        entry.config.events[eventType]!(eventPayload);
+    }
+
+    private updateGroundStateEvents(prevSupport: SupportInfo | null) {
+        const currentSupport = this.currentSupport;
+
+        // Check if support changed (player started/stopped being grounded on a platform)
+        if (prevSupport?.entry.element !== currentSupport?.entry.element) {
+            // Player left previous platform (stopped being grounded)
+            if (prevSupport?.entry) {
+                this.emitElementEvent('onPlayerLeave', prevSupport.entry.element);
+            }
+
+            // Player entered new platform (started being grounded)
+            if (currentSupport?.entry) {
+                this.emitElementEvent('onPlayerEnter', currentSupport.entry.element);
+            }
+        }
+    }
+
+
     private resolveBehavior(config: GameElementRegistration): GameElementBehavior {
         const base = ELEMENT_BEHAVIOR[config.type] ?? DEFAULT_BEHAVIOR;
         const maskFromSides = collisionMaskFromSides(config.collisionSides);
@@ -551,6 +598,9 @@ export class MarioGame {
 
         this.updateSoundState(prevGrounded, prevSupport, dt, vyBeforeResolve, horizontalCollision, hitBounds);
 
+        // Update ground state events based on support changes
+        this.updateGroundStateEvents(prevSupport);
+
         this.layOut();
     };
 
@@ -647,6 +697,12 @@ export class MarioGame {
             if (collision) {
                 this.x = resolvedX;
                 this.vx = 0;
+                if (collisionSupport) {
+                    this.emitElementEvent('onPlayerCollide', (collisionSupport as SupportInfo).entry.element, {
+                        direction: "right",
+                        speed: speedBefore,
+                    });
+                }
                 return {
                     support: collisionSupport,
                     direction: "right",
@@ -689,6 +745,12 @@ export class MarioGame {
         if (collision) {
             this.x = resolvedX;
             this.vx = 0;
+            if (collisionSupport) {
+                this.emitElementEvent('onPlayerCollide', (collisionSupport as SupportInfo).entry.element, {
+                    direction: "left",
+                    speed: speedBefore,
+                });
+            }
             return {
                 support: collisionSupport,
                 direction: "left",
@@ -743,9 +805,16 @@ export class MarioGame {
                 this.vy = 0;
                 grounded = true;
                 this.currentSupport = landingSupport;
+                if (landingSupport) {
+                    this.emitElementEvent('onPlayerCollide', (landingSupport as SupportInfo).entry.element, {
+                        direction: "top",
+                        speed: Math.abs(this.vy),
+                    });
+                }
             }
         } else if (this.vy < 0) {
             let ceiling = Number.NEGATIVE_INFINITY;
+            let ceilingEntry: RegisteredElement | null = null;
 
             for (const entry of solids) {
                 const { behavior } = entry;
@@ -763,7 +832,10 @@ export class MarioGame {
                     const futureTop = nextY;
 
                     if (previousTop >= platformBottom && futureTop <= platformBottom) {
-                        ceiling = Math.max(ceiling, platformBottom);
+                        if (platformBottom > ceiling) {
+                            ceiling = platformBottom;
+                            ceilingEntry = entry;
+                        }
                     }
                 }
             }
@@ -771,6 +843,12 @@ export class MarioGame {
             if (ceiling !== Number.NEGATIVE_INFINITY) {
                 nextY = ceiling;
                 this.vy = 0;
+                if (ceilingEntry) {
+                    this.emitElementEvent('onPlayerCollide', ceilingEntry.element, {
+                        direction: "bottom",
+                        speed: Math.abs(this.vy),
+                    });
+                }
             }
         }
 
@@ -1041,6 +1119,7 @@ export class MarioGame {
 
     layOut() {
         this.playerEl.style.transform = `translate(${this.x}px, ${this.y}px)`;
+        this.playerEl.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'center' })
 
         const playerState = this.getPlayerState();
         if (playerState !== this.lastState) {
@@ -1079,8 +1158,6 @@ export class MarioGame {
             }
 
             this.lastState = playerState;
-
-            this.playerEl.scrollIntoView({ behavior: 'smooth' })
         }
     }
 

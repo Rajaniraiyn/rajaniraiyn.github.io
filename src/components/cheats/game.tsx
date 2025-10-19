@@ -13,6 +13,6 @@ export function Game() {
     }, [addPlayer]);
 
     return (
-        <img className="size-20 -left-6! z-100 scroll-mt-[25vh]" ref={characterRef} alt="Character" style={{ transform: 'translateX(-50%)' }} />
+        <img className="size-20 -left-6! z-100 will-change-transform" ref={characterRef} alt="Character" style={{ transform: 'translateX(-50%)' }} />
     );
 }

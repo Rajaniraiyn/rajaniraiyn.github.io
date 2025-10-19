@@ -4,7 +4,7 @@ import type { DependencyList } from "react"
 import { useGame } from "@/contexts/game"
 import type { GameElementRegistration } from "@/lib/mario-game"
 
-function normalizeConfig(config: GameElementRegistration): GameElementRegistration {
+function normalizeConfig(config: Omit<GameElementRegistration, 'events'>): Omit<GameElementRegistration, 'events'> {
     return {
         ...config,
         collisionSides: config.collisionSides ? { ...config.collisionSides } : undefined,
@@ -20,7 +20,15 @@ export function useGameElement<T extends HTMLElement>(
     const { addElement } = useGame()
     const cleanupRef = useRef<(() => void) | null>(null)
 
-    const normalizedConfig = useMemo(() => normalizeConfig(config), deps)
+    // Extract events from config to avoid including them in deps unnecessarily
+    const { events, ...configWithoutEvents } = config
+    const normalizedConfig = useMemo(() => normalizeConfig(configWithoutEvents), deps)
+
+    // Combine normalized config with events
+    const finalConfig = useMemo(() => ({
+        ...normalizedConfig,
+        events,
+    }), [normalizedConfig, events])
 
     const register = useCallback(
         (node: T | null) => {
@@ -30,10 +38,10 @@ export function useGameElement<T extends HTMLElement>(
             }
 
             if (node) {
-                cleanupRef.current = addElement(node, normalizedConfig) ?? null
+                cleanupRef.current = addElement(node, finalConfig) ?? null
             }
         },
-        [addElement, normalizedConfig],
+        [addElement, finalConfig],
     )
 
     useEffect(

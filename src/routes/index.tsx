@@ -12,10 +12,11 @@ import { useTheme } from '@/contexts/theme'
 import { useGameElement } from '@/hooks/use-game-element'
 import { GameElement, GameSurface } from '@/lib/mario-game'
 import { createFileRoute, Link } from '@tanstack/react-router'
+import confetti from "canvas-confetti"
 import { BuildingIcon, ExternalLink, GithubIcon } from 'lucide-react'
+import type { Transition } from "motion"
 import type { ComponentProps, ReactNode } from 'react'
 import { useCallback } from 'react'
-import type { Transition } from "motion"
 
 export const Route = createFileRoute('/')({
     component: RouteComponent,
@@ -25,10 +26,12 @@ function RouteComponent() {
     const workExperienceTitleRef = useGameElement<HTMLHeadingElement>({
         type: GameElement.PLATFORM,
         surface: GameSurface.WOOD,
+        collisionSides: { top: true, bottom: true, left: true, right: true },
     })
     const projectsTitleRef = useGameElement<HTMLHeadingElement>({
         type: GameElement.PLATFORM,
         surface: GameSurface.WOOD,
+        collisionSides: { top: true, bottom: true, left: true, right: true },
     })
 
     return (
@@ -211,7 +214,7 @@ function About() {
             <TooltipProvider delay={0}>
                 <p>
                     Dynamic and versatile engineer with {careerYears}+ years of experience specializing in frontend and desktop application development, with a strong focus on{" "}
-                    <HighlightedTextWithPreview previewUrl={naturePixelArtSrc}>interaction engineering and user experience</HighlightedTextWithPreview>
+                    <HighlightedTextWithPreview previewUrl={naturePixelArtSrc} isFirst>interaction engineering and user experience</HighlightedTextWithPreview>
                     .
                 </p>
                 <p>
@@ -240,12 +243,50 @@ function About() {
     )
 }
 
-function HighlightedTextWithPreview({ children, previewUrl }: { children: ReactNode, previewUrl?: string }) {
+function HighlightedTextWithPreview({ children, previewUrl, isFirst }: { children: ReactNode, previewUrl?: string, isFirst?: boolean }) {
     const { resolvedTheme } = useTheme();
+
     const registerPlatform = useGameElement<HTMLElement>({
         type: GameElement.PLATFORM,
         collisionSides: { top: true },
         surface: GameSurface.CARPET,
+        events: isFirst ? {
+            onPlayerEnter: (_payload) => {
+                console.log("player reached top");
+
+                // Fullscreen confetti shower!
+                const duration = 3000;
+                const end = Date.now() + duration;
+
+                const frame = () => {
+                    confetti({
+                        particleCount: 50,
+                        angle: 60,
+                        spread: 55,
+                        origin: { x: 0, y: 0.8 },
+                        colors: ['#FFD700', '#FFA500', '#FFFF00', '#FFFFFF', '#FF6B35']
+                    });
+
+                    confetti({
+                        particleCount: 50,
+                        angle: 120,
+                        spread: 55,
+                        origin: { x: 1, y: 0.8 },
+                        colors: ['#FFD700', '#FFA500', '#FFFF00', '#FFFFFF', '#FF6B35']
+                    });
+
+                    if (Date.now() < end) {
+                        requestAnimationFrame(frame);
+                    }
+                };
+
+                frame();
+            },
+            onPlayerLeave: (_payload) => {
+                console.log("player left top");
+                // Confetti automatically disappears, no cleanup needed
+            },
+        } : undefined,
     })
     const attachHighlighterRef = useCallback((instance: TextHighlighterRef | null) => {
         registerPlatform(instance?.componentElement ?? null)
