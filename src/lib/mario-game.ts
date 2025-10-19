@@ -83,8 +83,8 @@ export const GAME = {
     WALK_THRESHOLD: 18,        // px/sec to be considered walking
     RUN_THRESHOLD: 150,        // px/sec to be considered running
     JUMP_VELOCITY: 700,       // px/sec impulse up
-    CHARACTER_WIDTH: 80,
-    CHARACTER_HEIGHT: 80,
+    CHARACTER_WIDTH: 40,
+    CHARACTER_HEIGHT: 75,
     GROUND_OFFSET: 80,         // px spacing from bottom of document
 };
 
@@ -253,7 +253,7 @@ function playResolvedSound(resolved: ResolvedSound, payload: GameSoundPayload) {
         resolved.currentTime = 0;
         const playPromise = resolved.play();
         if (playPromise && typeof playPromise.catch === "function") {
-            playPromise.catch(() => {});
+            playPromise.catch(() => { });
         }
     } catch {
         // ignore playback errors
@@ -360,20 +360,20 @@ export class MarioGame {
     }
 
     addElement(dom: HTMLElement, options: GameElementRegistration) {
-    const resolvedConfig: GameElementRegistration = {
-        ...options,
-        surface: options.surface ?? GameSurface.DEFAULT,
-    };
-    const behavior = this.resolveBehavior(resolvedConfig);
-    const measurements = measureElement(dom);
-    const entry: RegisteredElement = {
-        element: dom,
-        type: options.type,
-        behavior,
-        config: resolvedConfig,
-        rect: measurements.rect,
-        segments: measurements.segments,
-    };
+        const resolvedConfig: GameElementRegistration = {
+            ...options,
+            surface: options.surface ?? GameSurface.DEFAULT,
+        };
+        const behavior = this.resolveBehavior(resolvedConfig);
+        const measurements = measureElement(dom);
+        const entry: RegisteredElement = {
+            element: dom,
+            type: options.type,
+            behavior,
+            config: resolvedConfig,
+            rect: measurements.rect,
+            segments: measurements.segments,
+        };
 
         this.elementRegistry.set(dom, entry);
         this.element[options.type].add(dom);
@@ -1079,6 +1079,8 @@ export class MarioGame {
             }
 
             this.lastState = playerState;
+
+            this.playerEl.scrollIntoView({ behavior: 'smooth' })
         }
     }
 

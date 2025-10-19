@@ -1,6 +1,6 @@
-import { MarioGame, createGameSoundHandler, type GameElement, type GameElementRegistration, type GameOptions, type GameSoundHandler } from "@/lib/mario-game"
-import { createDefaultMarioSoundHandler } from "@/lib/mario-soundscape"
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react"
+import { MarioGame, createGameSoundHandler, type GameElementRegistration, type GameOptions, type GameSoundHandler } from "@/lib/mario-game";
+import { createDefaultMarioSoundHandler } from "@/lib/mario-soundscape";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 
 export interface GameContextType {
     game: MarioGame | null;
