@@ -338,6 +338,7 @@ export class MarioGame {
     private disposables = new Set<() => void>();
     private lastState: PlayerState | null = null;
     private lastDt = 0;
+    private preloadLinks: HTMLLinkElement[] = [];
 
     private elementRegistry = new Map<HTMLElement, RegisteredElement>();
     private world = { width: 0, height: 0, groundTop: 0 };
@@ -361,6 +362,9 @@ export class MarioGame {
         this.playerEl.style.left = "0px";
         this.playerEl.src = Man.STANDING;
 
+        // Preload all sprite images
+        this.preloadSprites();
+
         this.configureOptions(options);
 
         this.measureWorld();
@@ -371,6 +375,21 @@ export class MarioGame {
         this.installInput();
         this.installEnvironmentObservers();
         this.layOut();
+    }
+
+    private preloadSprites() {
+        const spriteUrls = Object.values(Man);
+        const head = document.head || document.getElementsByTagName('head')[0];
+
+        spriteUrls.forEach(url => {
+            const link = document.createElement('link');
+            link.rel = 'preload';
+            link.as = 'image';
+            link.href = url;
+            link.crossOrigin = 'anonymous';
+            head.appendChild(link);
+            this.preloadLinks.push(link);
+        });
     }
 
     start() {
@@ -571,6 +590,14 @@ export class MarioGame {
         this.elementRegistry.clear();
         this.currentSupport = null;
         this.resetControls();
+
+        // Remove preload links
+        this.preloadLinks.forEach(link => {
+            if (link.parentNode) {
+                link.parentNode.removeChild(link);
+            }
+        });
+        this.preloadLinks = [];
     }
 
     tick = (frameData: FrameData) => {
