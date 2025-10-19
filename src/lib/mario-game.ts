@@ -370,9 +370,12 @@ export class MarioGame {
 
         this.installInput();
         this.installEnvironmentObservers();
+        this.layOut();
+    }
+
+    start() {
         const process = frame.preRender(this.tick, true);
         this.disposables.add(() => cancelFrame(process));
-        this.layOut();
     }
 
     addElement(dom: HTMLElement, options: GameElementRegistration) {

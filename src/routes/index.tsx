@@ -6,6 +6,7 @@ import { TextHighlighter, type TextHighlighterRef } from "@/components/fancy/tex
 import { Header } from '@/components/header'
 import { Accordion, AccordionItem, AccordionPanel, AccordionTrigger } from '@/components/ui/accordion'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tooltip, TooltipPopup, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useTheme } from '@/contexts/theme'
@@ -13,16 +14,23 @@ import { useGameElement } from '@/hooks/use-game-element'
 import { GameElement, GameSurface } from '@/lib/mario-game'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import confetti from "canvas-confetti"
-import { BuildingIcon, ExternalLink, GithubIcon } from 'lucide-react'
+import { BuildingIcon, ExternalLink, GithubIcon, Play } from 'lucide-react'
 import type { Transition } from "motion"
 import type { ComponentProps, ReactNode } from 'react'
 import { useCallback } from 'react'
+import { z } from 'zod/mini'
 
 export const Route = createFileRoute('/')({
+    validateSearch: (search) => z.object({
+        game: z.optional(z.boolean()),
+    }).parse(search),
     component: RouteComponent,
 })
 
 function RouteComponent() {
+    const { game: isGameActive } = Route.useSearch()
+    const navigate = Route.useNavigate()
+
     const workExperienceTitleRef = useGameElement<HTMLHeadingElement>({
         type: GameElement.PLATFORM,
         surface: GameSurface.WOOD,
@@ -199,7 +207,24 @@ function RouteComponent() {
                     />
                 </Accordion>
             </section>
-            <Game />
+
+            {/* Game Section */}
+            {!isGameActive && (
+                <section className='px-2'>
+                    <div className='flex justify-center py-8'>
+                        <Button
+                            onClick={() => navigate({ search: { game: true } })}
+                            size="lg"
+                            className="gap-2"
+                        >
+                            <Play className="size-5" />
+                            Start Adventure
+                        </Button>
+                    </div>
+                </section>
+            )}
+
+            {isGameActive && <Game />}
         </div>
     )
 }

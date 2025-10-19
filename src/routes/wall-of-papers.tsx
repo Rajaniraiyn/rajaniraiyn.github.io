@@ -16,11 +16,11 @@ function RouteComponent() {
     const navigate = Route.useNavigate()
 
     const openFullscreen = useCallback((index: number) => {
-        navigate({ search: { i: index } })
+        navigate({ search: { i: index }, replace: true as const })
     }, [navigate])
 
     const closeFullscreen = useCallback(() => {
-        navigate({ search: {} })
+        navigate({ search: {}, replace: true })
     }, [navigate])
 
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
