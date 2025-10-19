@@ -211,13 +211,14 @@ function RouteComponent() {
             {/* Game Section */}
             {!isGameActive && (
                 <section className='px-2'>
-                    <div className='flex justify-center py-8'>
+                    <div className='flex justify-center py-4'>
                         <Button
                             onClick={() => navigate({ search: { game: true } })}
-                            size="lg"
-                            className="gap-2"
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5 px-3 py-1.5 text-sm"
                         >
-                            <Play className="size-5" />
+                            <Play className="size-4" />
                             Start Adventure
                         </Button>
                     </div>
