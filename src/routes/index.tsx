@@ -6,7 +6,6 @@ import { TextHighlighter, type TextHighlighterRef } from "@/components/fancy/tex
 import { Header } from '@/components/header'
 import { Accordion, AccordionItem, AccordionPanel, AccordionTrigger } from '@/components/ui/accordion'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tooltip, TooltipPopup, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useTheme } from '@/contexts/theme'
@@ -14,7 +13,7 @@ import { useGameElement } from '@/hooks/use-game-element'
 import { GameElement, GameSurface } from '@/lib/mario-game'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import confetti from "canvas-confetti"
-import { BuildingIcon, ExternalLink, GithubIcon, Play } from 'lucide-react'
+import { BuildingIcon, ExternalLink, GithubIcon } from 'lucide-react'
 import type { Transition } from "motion"
 import type { ComponentProps, ReactNode } from 'react'
 import { useCallback } from 'react'
@@ -29,7 +28,6 @@ export const Route = createFileRoute('/')({
 
 function RouteComponent() {
     const { game: isGameActive } = Route.useSearch()
-    const navigate = Route.useNavigate()
 
     const workExperienceTitleRef = useGameElement<HTMLHeadingElement>({
         type: GameElement.PLATFORM,
@@ -207,24 +205,6 @@ function RouteComponent() {
                     />
                 </Accordion>
             </section>
-
-            {/* Game Section */}
-            {!isGameActive && (
-                <section className='px-2'>
-                    <div className='flex justify-center py-4'>
-                        <Button
-                            onClick={() => navigate({ search: { game: true } })}
-                            variant="outline"
-                            size="sm"
-                            className="gap-1.5 px-3 py-1.5 text-sm"
-                        >
-                            <Play className="size-4" />
-                            Start Adventure
-                        </Button>
-                    </div>
-                </section>
-            )}
-
             {isGameActive && <Game />}
         </div>
     )

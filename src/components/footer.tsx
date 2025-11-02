@@ -1,21 +1,33 @@
-import { cn } from "@/lib/utils";
 import { Signature } from "@/components/signature";
-import { Link } from "@tanstack/react-router";
-import { GithubIcon, InstagramIcon, LinkedinIcon, TwitterIcon, PaletteIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Link, useSearch } from "@tanstack/react-router";
+import { GithubIcon, InstagramIcon, LinkedinIcon, PaletteIcon, Play, TwitterIcon } from "lucide-react";
 
 export function Footer({ className, ...props }: Omit<React.ComponentProps<'footer'>, 'children'>) {
+    const isGameActive = useSearch({ strict: false, select: (search) => search.game });
+
     return (
         <footer className={cn('max-w-3xl mx-auto p-3 space-y-4', className)} {...props}>
             {/* Main footer content */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                {/* Left side - Wall of Papers */}
-                <div className="flex items-center gap-2">
+                {/* Left side - Easter Eggs */}
+                <div className="flex items-center gap-4">
+                    {!isGameActive && (
+                        <Link
+                            to="/"
+                            search={{ game: true }}
+                            className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-accent/50"
+                            aria-label="Start Adventure"
+                        >
+                            <Play className="size-4" />
+                        </Link>
+                    )}
                     <Link
                         to="/wall-of-papers"
-                        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-accent/50"
+                        aria-label="Wall of Papers"
                     >
                         <PaletteIcon className="size-4" />
-                        Wall of Papers
                     </Link>
                 </div>
 
