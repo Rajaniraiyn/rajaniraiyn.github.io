@@ -4,6 +4,7 @@ import naturePixelArtSrc from '@/assets/wallpapers/nature.jpeg'
 import { Game } from '@/components/cheats/game'
 import { TextHighlighter, type TextHighlighterRef } from "@/components/fancy/text/text-highlighter"
 import { Header } from '@/components/header'
+import { TechStack } from '@/components/stack'
 import { Accordion, AccordionItem, AccordionPanel, AccordionTrigger } from '@/components/ui/accordion'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
@@ -206,6 +207,10 @@ function RouteComponent() {
                         ]}
                     />
                 </Accordion>
+            </section>
+            <section className='space-y-4 px-2'>
+                <h2 className='text-2xl font-bold font-departure-mono uppercase w-fit'>Stack</h2>
+                <TechStack />
             </section>
             {isGameActive && <Game />}
             {savedWallpaper && <img
