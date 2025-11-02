@@ -21,6 +21,7 @@
   "registries": {
     "@basecn": "https://basecn.dev/r/{name}.json",
     "@magicui": "https://magicui.design/r/{name}.json",
-    "@fancy": "https://fancycomponents.dev/r/{name}.json"
+    "@fancy": "https://fancycomponents.dev/r/{name}.json",
+    "@coss": "https://coss.com/ui/r/{name}.json"
   }
 }
