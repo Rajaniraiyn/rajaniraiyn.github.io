@@ -1,18 +1,29 @@
 import { HyperText } from "@/components/ui/hyper-text";
+import { useStorage } from "@/hooks/use-storage";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
 export function Header({ className, ...props }: React.ComponentProps<'header'>) {
+    const [savedWallpaper] = useStorage<string | null>('favorite-wallpaper', { defaultValue: null })
+
+    const isWallpaperSaved = !!savedWallpaper;
+
     return (
         <header
             className={cn({ "drop-shadow-secondary drop-shadow-md": false, }, className)}
             {...props}
         >
-            <div className='w-full h-1 bg-background' />
+            <div className={cn('w-full h-1 bg-background', {
+                'opacity-75': isWallpaperSaved,
+            })} />
             <div className='flex flex-row'>
-                <Name className='bg-background p-3 rounded-br-4xl' />
+                <Name className={cn('bg-background p-3 rounded-br-4xl', {
+                    'bg-background/75': isWallpaperSaved,
+                })} />
                 <svg
-                    className='size-7'
+                    className={cn('size-7', {
+                        'opacity-75': isWallpaperSaved,
+                    })}
                     viewBox="0 0 30 30"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg">
@@ -29,7 +40,9 @@ export function Header({ className, ...props }: React.ComponentProps<'header'>) 
                 </svg>
             </div>
             <svg
-                className="size-7"
+                className={cn('size-7', {
+                    'opacity-75': isWallpaperSaved,
+                })}
                 viewBox="0 0 30 30"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"

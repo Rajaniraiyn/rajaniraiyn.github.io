@@ -17,7 +17,10 @@ import sunsetUrl from "@/assets/wallpapers/sunset.jpeg?url";
 import urbanSkyscrapersPortraitUrl from "@/assets/wallpapers/urban-skyscrapers-portrait.jpeg?url";
 import waterfallPortraitUrl from "@/assets/wallpapers/waterfall-portrait.jpeg?url";
 import winterLandscapePortraitUrl from "@/assets/wallpapers/winter-landscape-portrait.jpeg?url";
+import { Button } from '@/components/ui/button';
+import { useStorage } from '@/hooks/use-storage';
 import { createFileRoute } from '@tanstack/react-router';
+import { Heart } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
 import { z } from 'zod/mini';
 
@@ -53,6 +56,7 @@ const wallpapers = [
 function RouteComponent() {
     const { i: selected } = Route.useSearch()
     const navigate = Route.useNavigate()
+    const [_, setSavedWallpaper] = useStorage<string | null>('favorite-wallpaper', { defaultValue: null })
 
     const openFullscreen = useCallback((index: number) => {
         navigate({ search: { i: index }, replace: true as const })
@@ -61,6 +65,13 @@ function RouteComponent() {
     const closeFullscreen = useCallback(() => {
         navigate({ search: {}, replace: true })
     }, [navigate])
+
+    const handleLikeWallpaper = useCallback(() => {
+        if (selected !== undefined) {
+            setSavedWallpaper(wallpapers[selected])
+            navigate({ to: '/' })
+        }
+    }, [selected, navigate, setSavedWallpaper])
 
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
         if (e.key === 'Escape' && selected !== undefined) {
@@ -133,9 +144,22 @@ function RouteComponent() {
                             </svg>
                         </button>
 
-                        {/* Image counter */}
-                        <div className='absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full text-white text-sm'>
-                            {selected + 1} / {wallpapers.length}
+                        {/* Bottom controls */}
+                        <div className='absolute bottom-4 left-0 right-0 flex items-center justify-between px-4 gap-4'>
+                            {/* Image counter */}
+                            <div className='bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full text-white text-sm'>
+                                {selected + 1} / {wallpapers.length}
+                            </div>
+
+                            {/* I like this button */}
+                            <Button
+                                onClick={handleLikeWallpaper}
+                                className='bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm gap-2 border-white/20'
+                                variant="outline"
+                            >
+                                <Heart className="size-4" />
+                                I like this
+                            </Button>
                         </div>
 
                         {/* Navigation arrows */}

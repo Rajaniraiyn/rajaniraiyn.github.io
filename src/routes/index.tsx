@@ -10,6 +10,7 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tooltip, TooltipPopup, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useTheme } from '@/contexts/theme'
 import { useGameElement } from '@/hooks/use-game-element'
+import { useStorage } from '@/hooks/use-storage'
 import { GameElement, GameSurface } from '@/lib/mario-game'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import confetti from "canvas-confetti"
@@ -28,6 +29,7 @@ export const Route = createFileRoute('/')({
 
 function RouteComponent() {
     const { game: isGameActive } = Route.useSearch()
+    const [savedWallpaper] = useStorage<string | null>('favorite-wallpaper', { defaultValue: null })
 
     const workExperienceTitleRef = useGameElement<HTMLHeadingElement>({
         type: GameElement.PLATFORM,
@@ -206,6 +208,12 @@ function RouteComponent() {
                 </Accordion>
             </section>
             {isGameActive && <Game />}
+            {savedWallpaper && <img
+                src={savedWallpaper}
+                alt="Saved Wallpaper"
+                className="absolute inset-0 size-full -z-10 object-cover opacity-25"
+                style={{ imageRendering: 'pixelated' }}
+            />}
         </div>
     )
 }
