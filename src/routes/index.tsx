@@ -318,7 +318,7 @@ function HighlightedTextWithPreview({ children, previewUrl, isFirst }: { childre
     }, [registerPlatform])
 
     const highlighterProps = {
-        className: "rounded-sm px-px mix-blend-difference",
+        className: "rounded-sm px-px mix-blend-multiply",
         highlightColor: resolvedTheme === "dark"
             ? ["hsl(30, 70%, 45%)", "hsl(25, 85%, 35%)", "hsl(20, 90%, 25%)"]
             : ["hsl(45, 80%, 85%)", "hsl(35, 90%, 90%)", "hsl(40, 85%, 95%)"],
@@ -347,7 +347,12 @@ function WorkExperience({ title, company, companyUrl, icon, startDate, endDate }
         surface: GameSurface.CONCRETE,
     })
     return (
-        <Card ref={platformRef} className='p-2 gap-1 last:border-b-1'>
+        <Card
+            ref={platformRef}
+            className={cn('p-2 gap-1 last:border-b-1',
+                'supports-[corner-shape:squircle]:corner-shape-squircle supports-[corner-shape:squircle]:rounded-4xl',
+                'before:supports-[corner-shape:squircle]:corner-shape-squircle before:supports-[corner-shape:squircle]:rounded-4xl'
+            )}>
             <CardHeader className="p-0 flex justify-between flex-row flex-wrap items-start gap-2">
                 <Avatar className="sm:size-12 rounded-xl bg-transparent">
                     <AvatarImage src={icon} alt={company} />
@@ -378,7 +383,14 @@ function Project({ name, github, website, startDate, endDate, description, detai
     })
 
     return (
-        <AccordionItem render={<div ref={platformRef} />} className='px-2 py-1 gap-1 rounded border border-border/60 bg-card/60 last:border-b-1'>
+        <AccordionItem
+            render={<div ref={platformRef} />}
+            className={cn(
+                'px-2 py-1 gap-1 border border-border/60 bg-card/60 last:border-b-1',
+                'supports-[corner-shape:squircle]:corner-shape-squircle supports-[corner-shape:squircle]:rounded-2xl',
+                'before:supports-[corner-shape:squircle]:corner-shape-squircle before:supports-[corner-shape:squircle]:rounded-2xl'
+            )}
+        >
             <AccordionTrigger className="p-0 flex flex-row justify-between items-center [&[data-panel-open]_svg[data-chevron]]:rotate-90 group">
                 <div className="flex items-center gap-3">
                     <div className="flex-1">

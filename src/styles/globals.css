@@ -175,3 +175,7 @@
   font-family: "Departure Mono", monospace;
   font-synthesis: none;
 }
+
+@utility corner-shape-squircle {
+  corner-shape: squircle;
+}
