@@ -27,6 +27,7 @@
     // "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
+    "skipDefaultLibCheck": true,
     /* Paths */
     "baseUrl": ".",
     "paths": {
@@ -37,5 +38,8 @@
   },
   "include": [
     "src"
+  ],
+  "exclude": [
+    "node_modules",
   ]
 }

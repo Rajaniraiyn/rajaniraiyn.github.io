@@ -15,7 +15,6 @@ import { projects, type Project, type Project as ProjectItem } from "@/data/proj
 import { stack, type Stack } from "@/data/stack"
 import { works, type Work } from "@/data/works"
 import { useGameElement } from '@/hooks/use-game-element'
-import { useStorage } from '@/hooks/use-storage'
 import { GameElement, GameSurface } from '@/lib/mario-game'
 import { cn } from '@/lib/utils'
 import { createFileRoute, Link } from '@tanstack/react-router'
@@ -35,7 +34,6 @@ export const Route = createFileRoute('/')({
 
 function RouteComponent() {
     const { game: isGameActive } = Route.useSearch()
-    const [savedWallpaper] = useStorage<string | null>('favorite-wallpaper', { defaultValue: null })
 
     const workExperienceTitleRef = useGameElement<HTMLHeadingElement>({
         type: GameElement.PLATFORM,
@@ -73,6 +71,7 @@ function RouteComponent() {
         surface: GameSurface.WOOD,
         collisionSides: { top: true, },
     })
+    const navigate = Route.useNavigate()
 
     return (
         <div className='space-y-10 scroll-pt-1'>
@@ -86,6 +85,7 @@ function RouteComponent() {
                     {Object.entries(works).map(([key, work]) => (
                         <WorkExperience
                             key={key}
+                            onClick={() => navigate({ to: '/work/@{$company}', params: { company: key } })}
                             {...work}
                         />
                     ))}
@@ -166,12 +166,6 @@ function RouteComponent() {
                 </p>
             </section>
             {isGameActive && <Game />}
-            {savedWallpaper && <img
-                src={savedWallpaper}
-                alt="Saved Wallpaper"
-                className="absolute inset-0 size-full -z-10 object-cover opacity-25"
-                style={{ imageRendering: 'pixelated' }}
-            />}
         </div>
     )
 }

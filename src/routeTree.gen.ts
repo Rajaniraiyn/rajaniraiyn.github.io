@@ -11,9 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WallOfPapersRouteImport } from './routes/wall-of-papers'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as WorkAtsantaRouteImport } from './routes/work/@santa'
-import { Route as WorkAtportalRouteImport } from './routes/work/@portal'
-import { Route as WorkAtabacusRouteImport } from './routes/work/@abacus'
+import { Route as WorkAtChar123companyChar125RouteImport } from './routes/work.@{$company}'
 
 const WallOfPapersRoute = WallOfPapersRouteImport.update({
   id: '/wall-of-papers',
@@ -25,74 +23,41 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WorkAtsantaRoute = WorkAtsantaRouteImport.update({
-  id: '/work/@santa',
-  path: '/work/@santa',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const WorkAtportalRoute = WorkAtportalRouteImport.update({
-  id: '/work/@portal',
-  path: '/work/@portal',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const WorkAtabacusRoute = WorkAtabacusRouteImport.update({
-  id: '/work/@abacus',
-  path: '/work/@abacus',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const WorkAtChar123companyChar125Route =
+  WorkAtChar123companyChar125RouteImport.update({
+    id: '/work/@{$company}',
+    path: '/work/@{$company}',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/wall-of-papers': typeof WallOfPapersRoute
-  '/work/@abacus': typeof WorkAtabacusRoute
-  '/work/@portal': typeof WorkAtportalRoute
-  '/work/@santa': typeof WorkAtsantaRoute
+  '/work/@{$company}': typeof WorkAtChar123companyChar125Route
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/wall-of-papers': typeof WallOfPapersRoute
-  '/work/@abacus': typeof WorkAtabacusRoute
-  '/work/@portal': typeof WorkAtportalRoute
-  '/work/@santa': typeof WorkAtsantaRoute
+  '/work/@{$company}': typeof WorkAtChar123companyChar125Route
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/wall-of-papers': typeof WallOfPapersRoute
-  '/work/@abacus': typeof WorkAtabacusRoute
-  '/work/@portal': typeof WorkAtportalRoute
-  '/work/@santa': typeof WorkAtsantaRoute
+  '/work/@{$company}': typeof WorkAtChar123companyChar125Route
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/wall-of-papers'
-    | '/work/@abacus'
-    | '/work/@portal'
-    | '/work/@santa'
+  fullPaths: '/' | '/wall-of-papers' | '/work/@{$company}'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/wall-of-papers'
-    | '/work/@abacus'
-    | '/work/@portal'
-    | '/work/@santa'
-  id:
-    | '__root__'
-    | '/'
-    | '/wall-of-papers'
-    | '/work/@abacus'
-    | '/work/@portal'
-    | '/work/@santa'
+  to: '/' | '/wall-of-papers' | '/work/@{$company}'
+  id: '__root__' | '/' | '/wall-of-papers' | '/work/@{$company}'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   WallOfPapersRoute: typeof WallOfPapersRoute
-  WorkAtabacusRoute: typeof WorkAtabacusRoute
-  WorkAtportalRoute: typeof WorkAtportalRoute
-  WorkAtsantaRoute: typeof WorkAtsantaRoute
+  WorkAtChar123companyChar125Route: typeof WorkAtChar123companyChar125Route
 }
 
 declare module '@tanstack/react-router' {
@@ -111,25 +76,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/work/@santa': {
-      id: '/work/@santa'
-      path: '/work/@santa'
-      fullPath: '/work/@santa'
-      preLoaderRoute: typeof WorkAtsantaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/work/@portal': {
-      id: '/work/@portal'
-      path: '/work/@portal'
-      fullPath: '/work/@portal'
-      preLoaderRoute: typeof WorkAtportalRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/work/@abacus': {
-      id: '/work/@abacus'
-      path: '/work/@abacus'
-      fullPath: '/work/@abacus'
-      preLoaderRoute: typeof WorkAtabacusRouteImport
+    '/work/@{$company}': {
+      id: '/work/@{$company}'
+      path: '/work/@{$company}'
+      fullPath: '/work/@{$company}'
+      preLoaderRoute: typeof WorkAtChar123companyChar125RouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -138,9 +89,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   WallOfPapersRoute: WallOfPapersRoute,
-  WorkAtabacusRoute: WorkAtabacusRoute,
-  WorkAtportalRoute: WorkAtportalRoute,
-  WorkAtsantaRoute: WorkAtsantaRoute,
+  WorkAtChar123companyChar125Route: WorkAtChar123companyChar125Route,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

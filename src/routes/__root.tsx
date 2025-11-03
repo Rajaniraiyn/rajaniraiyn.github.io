@@ -1,6 +1,7 @@
 import { Footer } from '@/components/footer'
 import { Header } from '@/components/header'
 import { Sidebar } from '@/components/sidebar'
+import { useStorage } from '@/hooks/use-storage'
 import { createRootRoute, Outlet } from '@tanstack/react-router'
 import { lazy, Suspense } from 'react'
 
@@ -11,6 +12,8 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
+  const [savedWallpaper] = useStorage<string | null>('favorite-wallpaper', { defaultValue: null })
+
   return (
     <div className='flex flex-row min-h-screen gap-1'>
       <Sidebar className='hidden' />
@@ -24,6 +27,13 @@ function RootComponent() {
       <Suspense>
         <LazySmoothScroll />
       </Suspense>
+
+      {savedWallpaper && <img
+        src={savedWallpaper}
+        alt="Saved Wallpaper"
+        className="absolute inset-0 size-full -z-10 object-cover opacity-25"
+        style={{ imageRendering: 'pixelated' }}
+      />}
     </div>
   )
 }

@@ -10,7 +10,9 @@ export default defineConfig({
     dedupe: ['react', 'react-dom'],
   },
   plugins: [
-    reactRouter(),
+    reactRouter({
+      autoCodeSplitting: true,
+    }),
     react({
       babel: {
         plugins: [['babel-plugin-react-compiler']],
