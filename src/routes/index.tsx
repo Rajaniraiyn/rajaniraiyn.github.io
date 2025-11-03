@@ -3,6 +3,7 @@ import gameTowerPixelArtSrc from '@/assets/wallpapers/game-tower.jpeg'
 import naturePixelArtSrc from '@/assets/wallpapers/nature.jpeg'
 import { Game } from '@/components/cheats/game'
 import { TextHighlighter, type TextHighlighterRef } from "@/components/fancy/text/text-highlighter"
+import { GitHubContributions } from '@/components/github-contributions'
 import { Header } from '@/components/header'
 import { DevToIcon, GithubIcon, InstagramIcon, LinkedinIcon, XIcon, YoutubeIcon } from '@/components/icons'
 import { Accordion, AccordionItem, AccordionPanel, AccordionTrigger } from '@/components/ui/accordion'
@@ -100,6 +101,9 @@ function RouteComponent() {
                         <ProjectItem key={key} {...project} />
                     ))}
                 </Accordion>
+            </section>
+            <section className='space-y-4 px-2 max-w-3xl mx-auto'>
+                <GitHubContributions />
             </section>
             <section className='space-y-4 px-2 max-w-3xl mx-auto'>
                 <h2 ref={techStackRef} className='text-2xl font-bold font-departure-mono uppercase w-fit'>Stack</h2>

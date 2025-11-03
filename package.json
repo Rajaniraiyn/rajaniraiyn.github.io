@@ -20,6 +20,7 @@
     "motion": "^12.23.24",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-github-calendar": "^4.5.11",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.14",
     "zod": "^4.1.12"
