@@ -4,12 +4,13 @@ import naturePixelArtSrc from '@/assets/wallpapers/nature.jpeg'
 import { Game } from '@/components/cheats/game'
 import { TextHighlighter, type TextHighlighterRef } from "@/components/fancy/text/text-highlighter"
 import { Header } from '@/components/header'
-import { TechStack } from '@/components/stack'
 import { Accordion, AccordionItem, AccordionPanel, AccordionTrigger } from '@/components/ui/accordion'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress, ProgressIndicator, ProgressTrack } from "@/components/ui/progress"
 import { Tooltip, TooltipPopup, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useTheme } from '@/contexts/theme'
+import { stack, type Stack } from "@/data/stack"
 import { useGameElement } from '@/hooks/use-game-element'
 import { useStorage } from '@/hooks/use-storage'
 import { GameElement, GameSurface } from '@/lib/mario-game'
@@ -38,6 +39,11 @@ function RouteComponent() {
         collisionSides: { top: true, bottom: true, left: true, right: true },
     })
     const projectsTitleRef = useGameElement<HTMLHeadingElement>({
+        type: GameElement.PLATFORM,
+        surface: GameSurface.WOOD,
+        collisionSides: { top: true, bottom: true, left: true, right: true },
+    })
+    const techStackRef = useGameElement<HTMLDivElement>({
         type: GameElement.PLATFORM,
         surface: GameSurface.WOOD,
         collisionSides: { top: true, bottom: true, left: true, right: true },
@@ -209,7 +215,7 @@ function RouteComponent() {
                 </Accordion>
             </section>
             <section className='space-y-4 px-2'>
-                <h2 className='text-2xl font-bold font-departure-mono uppercase w-fit'>Stack</h2>
+                <h2 ref={techStackRef} className='text-2xl font-bold font-departure-mono uppercase w-fit'>Stack</h2>
                 <TechStack />
             </section>
             {isGameActive && <Game />}
@@ -435,4 +441,38 @@ function formatDate(dateStr: string) {
     const month = date.toLocaleString('default', { month: 'short' })
     const year = date.getFullYear()
     return `${month} ${year}`
+}
+
+function TechStack() {
+    return (
+        <div className="grid [grid-template-columns:repeat(auto-fit,minmax(3rem,1fr))] gap-2">
+            {Object.entries(stack).map(([key, stack]) => (
+                <TechStackItem key={key} stack={stack} />
+            ))}
+        </div>
+    )
+}
+
+function TechStackItem({ stack }: { stack: Stack }) {
+    const platformRef = useGameElement<SVGSVGElement>({
+        type: GameElement.PLATFORM,
+        surface: GameSurface.WOOD,
+        collisionSides: { top: true },
+    })
+    return (
+        <Tooltip delay={0} closeDelay={0} hoverable={false} trackCursorAxis="x">
+            <TooltipTrigger render={<stack.icon ref={platformRef} />} tabIndex={0} className="size-full" />
+            <TooltipPopup className='max-w-3xs flex-col gap-2'>
+                <div>
+                    <h3 className="text-lg font-medium">{stack.name}</h3>
+                    <p className="text-balance">{stack.description}</p>
+                </div>
+                <Progress value={stack.proficiency * 100} className="w-full">
+                    <ProgressTrack>
+                        <ProgressIndicator className="bg-gradient-to-t from-secondary to-primary rounded" />
+                    </ProgressTrack>
+                </Progress>
+            </TooltipPopup>
+        </Tooltip>
+    )
 }

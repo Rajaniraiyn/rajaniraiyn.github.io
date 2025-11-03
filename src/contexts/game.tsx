@@ -12,7 +12,7 @@ export interface GameContextType {
     soundEnabled: boolean;
     musicEnabled: boolean;
     addPlayer: (playerEl: HTMLImageElement) => MarioGame;
-    addElement: (dom: HTMLElement, config: GameElementRegistration) => (() => void) | null;
+    addElement: (dom: HTMLElement | SVGElement, config: GameElementRegistration) => (() => void) | null;
     updateOptions: (options: GameOptions) => void;
     options: GameOptions;
     startGame: () => void;
@@ -30,7 +30,7 @@ export function GameProvider({ children, options }: { children: React.ReactNode;
     const [musicEnabled, setMusicEnabled] = useState(true);
     const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
     const registeredElements = useRef(
-        new Map<HTMLElement, { options: GameElementRegistration; detach: (() => void) | null }>(),
+        new Map<HTMLElement | SVGElement, { options: GameElementRegistration; detach: (() => void) | null }>(),
     );
     const defaultSoundHandlerRef = useRef(createDefaultMarioSoundHandler());
     const optionsRef = useRef<GameOptions>(normalizeGameOptions(options ?? {}, defaultSoundHandlerRef.current));
@@ -69,7 +69,7 @@ export function GameProvider({ children, options }: { children: React.ReactNode;
         return newGame;
     }, [attachRegisteredElements]);
 
-    const addElement = useCallback((dom: HTMLElement, config: GameElementRegistration) => {
+    const addElement = useCallback((dom: HTMLElement | SVGElement, config: GameElementRegistration) => {
         const normalizedConfig: GameElementRegistration = {
             ...config,
             collisionSides: config.collisionSides ? { ...config.collisionSides } : undefined,

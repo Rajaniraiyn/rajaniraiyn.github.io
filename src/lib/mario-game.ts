@@ -132,7 +132,7 @@ export enum GameSurface {
 }
 
 export interface GameSoundSupport {
-    element: HTMLElement;
+    element: HTMLElement | SVGElement;
     type: GameElement;
     rect: GameRect;
     surface: GameSurface;
@@ -171,7 +171,7 @@ export interface GameOptions {
 }
 
 export type GameElementEventPayload = {
-    element: HTMLElement;
+    element: HTMLElement | SVGElement;
     direction?: "left" | "right" | "top" | "bottom";
     speed?: number;
     metadata?: Record<string, unknown>;
@@ -277,7 +277,7 @@ function playResolvedSound(resolved: ResolvedSound, payload: GameSoundPayload) {
 }
 
 interface RegisteredElement {
-    element: HTMLElement;
+    element: HTMLElement | SVGElement;
     type: GameElement;
     rect: GameRect;
     segments: GameRect[];
@@ -340,9 +340,9 @@ export class MarioGame {
     private lastDt = 0;
     private preloadLinks: HTMLLinkElement[] = [];
 
-    private elementRegistry = new Map<HTMLElement, RegisteredElement>();
+    private elementRegistry = new Map<HTMLElement | SVGElement, RegisteredElement>();
     private world = { width: 0, height: 0, groundTop: 0 };
-    private dirtyElements = new Set<HTMLElement>();
+    private dirtyElements = new Set<HTMLElement | SVGElement>();
     private worldDirty = true;
     private currentSupport: SupportInfo | null = null;
     private options = { footstepInterval: DEFAULT_FOOTSTEP_INTERVAL };
@@ -352,7 +352,7 @@ export class MarioGame {
         footstepTimer: 0,
     };
 
-    public element: { [key in GameElement]: Set<HTMLElement> } = {
+    public element: { [key in GameElement]: Set<HTMLElement | SVGElement> } = {
         [GameElement.PLATFORM]: new Set(),
     };
 
@@ -397,7 +397,7 @@ export class MarioGame {
         this.disposables.add(() => cancelFrame(process));
     }
 
-    addElement(dom: HTMLElement, options: GameElementRegistration) {
+    addElement(dom: HTMLElement | SVGElement, options: GameElementRegistration) {
         const resolvedConfig: GameElementRegistration = {
             ...options,
             surface: options.surface ?? GameSurface.DEFAULT,
@@ -447,7 +447,7 @@ export class MarioGame {
         return cleanup;
     }
 
-    private emitElementEvent(eventType: keyof GameElementEvents, element: HTMLElement, payload: Omit<GameElementEventPayload, 'element'> = {}) {
+    private emitElementEvent(eventType: keyof GameElementEvents, element: HTMLElement | SVGElement, payload: Omit<GameElementEventPayload, 'element'> = {}) {
         const entry = this.elementRegistry.get(element);
         if (!entry?.config.events?.[eventType]) return;
 
@@ -522,7 +522,7 @@ export class MarioGame {
 
     }
 
-    private markElementDirty(element: HTMLElement) {
+    private markElementDirty(element: HTMLElement | SVGElement) {
         if (this.elementRegistry.has(element)) {
             this.dirtyElements.add(element);
         }
@@ -1200,7 +1200,7 @@ export class MarioGame {
     }
 }
 
-function measureElement(element: HTMLElement): { rect: GameRect; segments: GameRect[] } {
+function measureElement(element: HTMLElement | SVGElement): { rect: GameRect; segments: GameRect[] } {
     const bounding = element.getBoundingClientRect();
     const rect = toGameRect(bounding);
     const segments = Array.from(element.getClientRects())

@@ -4,8 +4,10 @@
         "*.css": "tailwindcss"
     },
     "cSpell.words": [
+        "hoverable",
         "oklch",
         "rajaniraiyn",
+        "santabrowser",
         "supabase",
         "unfonts",
         "unplugin"

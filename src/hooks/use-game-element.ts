@@ -13,7 +13,7 @@ function normalizeConfig(config: Omit<GameElementRegistration, 'events'>): Omit<
     }
 }
 
-export function useGameElement<T extends HTMLElement>(
+export function useGameElement<T extends HTMLElement | SVGElement>(
     config: GameElementRegistration,
     deps: DependencyList = [],
 ) {
