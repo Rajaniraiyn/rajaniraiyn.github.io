@@ -4,23 +4,26 @@ import naturePixelArtSrc from '@/assets/wallpapers/nature.jpeg'
 import { Game } from '@/components/cheats/game'
 import { TextHighlighter, type TextHighlighterRef } from "@/components/fancy/text/text-highlighter"
 import { Header } from '@/components/header'
+import { DevToIcon, GithubIcon, InstagramIcon, LinkedinIcon, XIcon, YoutubeIcon } from '@/components/icons'
 import { Accordion, AccordionItem, AccordionPanel, AccordionTrigger } from '@/components/ui/accordion'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress, ProgressIndicator, ProgressTrack } from "@/components/ui/progress"
 import { Tooltip, TooltipPopup, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useTheme } from '@/contexts/theme'
+import { projects, type Project, type Project as ProjectItem } from "@/data/projects"
 import { stack, type Stack } from "@/data/stack"
+import { works, type Work } from "@/data/works"
 import { useGameElement } from '@/hooks/use-game-element'
 import { useStorage } from '@/hooks/use-storage'
 import { GameElement, GameSurface } from '@/lib/mario-game'
 import { cn } from '@/lib/utils'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import confetti from "canvas-confetti"
-import { BuildingIcon, ExternalLink, GithubIcon } from 'lucide-react'
+import { BuildingIcon, ExternalLink, GithubIcon as GithubIconLucide } from 'lucide-react'
 import type { Transition } from "motion"
 import type { ComponentProps, ReactNode } from 'react'
-import { useCallback } from 'react'
+import { Children, useCallback, useState } from 'react'
 import { z } from 'zod/mini'
 
 export const Route = createFileRoute('/')({
@@ -49,6 +52,27 @@ function RouteComponent() {
         surface: GameSurface.WOOD,
         collisionSides: { top: true, bottom: true, left: true, right: true },
     })
+    const connectTitleRef = useGameElement<HTMLHeadingElement>({
+        type: GameElement.PLATFORM,
+        surface: GameSurface.WOOD,
+        collisionSides: { top: true, bottom: true, left: true, right: true },
+    })
+    const connectDescriptionRef = useGameElement<HTMLParagraphElement>({
+        type: GameElement.PLATFORM,
+        surface: GameSurface.WOOD,
+        collisionSides: { top: true, },
+    })
+
+    const connectLinksRef = useGameElement<HTMLDivElement>({
+        type: GameElement.PLATFORM,
+        surface: GameSurface.WOOD,
+        collisionSides: { top: true, },
+    })
+    const connectFooterRef = useGameElement<HTMLDivElement>({
+        type: GameElement.PLATFORM,
+        surface: GameSurface.WOOD,
+        collisionSides: { top: true, },
+    })
 
     return (
         <div className='space-y-10 scroll-pt-1'>
@@ -60,164 +84,84 @@ function RouteComponent() {
             <section className='space-y-4 px-2 max-w-3xl mx-auto'>
                 <h2 ref={workExperienceTitleRef} className='text-2xl font-bold font-departure-mono uppercase w-fit'>Work Experience</h2>
                 <Accordion className='flex flex-col gap-4 md:px-5' multiple>
-                    {/* <WorkExperience
-                        title="Desktop Application Developer"
-                        company="Abacus"
-                        companyUrl="https://abacus.ai"
-                        icon="https://www.google.com/s2/favicons?domain=abacus.ai&sz=128"
-                        startDate="2025-01-01"
-                        endDate="Present"
-                    /> */}
-                    <WorkExperience
-                        title="Founding Engineer"
-                        company="Portal"
-                        companyUrl="https://portal.so"
-                        icon="https://www.google.com/s2/favicons?domain=portal.so&sz=128"
-                        startDate="2023-12-01"
-                        // endDate="2025-01-01"
-                        endDate='Present'
-                    />
-                    <WorkExperience
-                        title="Software Developer"
-                        company="Santa Browser"
-                        companyUrl="https://santabrowser.com"
-                        icon={santaBrowserFaviconSrc}
-                        startDate="2023-01-01"
-                        endDate="2023-12-01"
-                    />
+                    {Object.entries(works).map(([key, work]) => (
+                        <WorkExperience
+                            key={key}
+                            {...work}
+                        />
+                    ))}
                 </Accordion>
+
             </section>
             <section className='space-y-4 px-2 max-w-3xl mx-auto'>
                 <h2 ref={projectsTitleRef} className='text-2xl font-bold font-departure-mono uppercase w-fit'>Projects</h2>
-                <Accordion className='flex flex-col gap-4 md:px-5' multiple>
-                    <Project
-                        name="React Alien Signals"
-                        github="https://github.com/Rajaniraiyn/react-alien-signals"
-                        website=""
-                        startDate="2024-11-01"
-                        endDate="Present"
-                        description="Alien React Signals is a TypeScript library that provides state management APIs built on top of Alien Signals."
-                        details={[
-                            "Modern state management solution for React applications with signal-based reactivity.",
-                            "Built on top of the powerful Alien Signals library for optimal performance.",
-                            "Provides familiar React hooks API while leveraging advanced signal patterns.",
-                            "52+ stars on GitHub, actively maintained and adopted by developers.",
-                        ]}
-                    />
-                    <Project
-                        name="AI SDK Solid"
-                        github="https://github.com/Rajaniraiyn/ai-sdk-solid"
-                        website=""
-                        startDate="2025-01-01"
-                        endDate="Present"
-                        description="AI SDK provider for solidjs - enabling seamless AI integration in SolidJS applications."
-                        details={[
-                            "Official AI SDK integration for the SolidJS reactive framework.",
-                            "Implements reactive AI state management with streaming capabilities.",
-                            "Provides TypeScript-first API for modern AI interactions.",
-                            "Enables reactive AI workflows within SolidJS applications.",
-                        ]}
-                    />
-                    <Project
-                        name="Vite Plugin React Scan"
-                        github="https://github.com/Rajaniraiyn/vite-plugin-react-scan"
-                        website=""
-                        startDate="2025-01-01"
-                        endDate="Present"
-                        description="Vite plugin for react-scan - automatic React performance monitoring and component analysis."
-                        details={[
-                            "Seamless Vite integration for the popular react-scan performance tool.",
-                            "Automatic component re-render analysis during development.",
-                            "Helps identify performance bottlenecks in React applications.",
-                            "Zero-config setup for immediate performance insights.",
-                        ]}
-                    />
-                    <Project
-                        name="CSSUnicorn"
-                        github="https://github.com/Rajaniraiyn/cssunicorn"
-                        website=""
-                        startDate="2024-12-01"
-                        endDate="Present"
-                        description="CSS utilities and components library for modern web development."
-                        details={[
-                            "Comprehensive CSS utility library for rapid web development.",
-                            "Modern component system with accessible and responsive design patterns.",
-                            "TypeScript support for type-safe styling solutions.",
-                            "Performance-optimized CSS with minimal bundle size impact.",
-                        ]}
-                    />
-                    <Project
-                        name="CDS Design System"
-                        github=""
-                        website="https://cds-design.github.io"
-                        startDate="2023-07-01"
-                        endDate="Present"
-                        description="A comprehensive design system & component library focused on interaction engineering (1.4k+ npm downloads)."
-                        details={[
-                            "Designed & developed reusable UI components and guidelines, improving development efficiency.",
-                            "Implemented micro-interactions and animations using Framer Motion and GSAP.",
-                            "Led the project from design to deployment, ensuring visual consistency and adherence to design principles.",
-                            "Enhanced developer experience by providing detailed documentation and tooling.",
-                        ]}
-                    />
-                    <Project
-                        name="UPM"
-                        github="https://github.com/Rajaniraiyn/upm"
-                        website=""
-                        startDate="2023-02-01"
-                        endDate="Present"
-                        description="A simplified and performant package manager built with Rust."
-                        details={[
-                            "Achieved high performance and memory safety using Rust.",
-                            "Simplified commands for better user experience.",
-                            "Ensured cross-platform support and scalability.",
-                        ]}
-                    />
-                    <Project
-                        name="svelte-sound"
-                        github="https://github.com/Rajaniraiyn/svelte-sound"
-                        website=""
-                        startDate="2022-11-01"
-                        endDate="Present"
-                        description="Svelte actions for playing interaction sounds on DOM events. (6.4k+ npm downloads)"
-                        details={[
-                            "Developed a lightweight and performant audio interaction library for Svelte.",
-                            "Implemented dynamic imports to support partial hydration.",
-                            "Created a scalable solution for complex game interactions.",
-                        ]}
-                    />
-                    <Project
-                        name="RTube"
-                        github="https://github.com/Rajaniraiyn/rtube"
-                        website=""
-                        startDate="2022-09-01"
-                        endDate="Present"
-                        description="A modern, lightweight YouTube video player and downloader."
-                        details={[
-                            "Built using web technologies and Svelte.",
-                            "Features include ad-free viewing, ultra-fast downloads with parallel connections, and resumable downloads.",
-                            "Designed an intuitive user interface, enhancing user satisfaction.",
-                        ]}
-                    />
-                    <Project
-                        name="Raj Browser"
-                        github="https://github.com/Rajaniraiyn/raj-browser"
-                        website=""
-                        startDate="2021-08-01"
-                        endDate="Present"
-                        description="A UI and privacy-focused web browser built from scratch using Electron.js."
-                        details={[
-                            "Engineered a custom browser focusing on privacy and user experience.",
-                            "Implemented ad-blocking, custom scrollbars, process management, and advanced download features.",
-                            "Designed a unique and modern interface, handling both design and development aspects.",
-                            "Optimized performance and resource usage, resulting in a lightweight application used by thousands of users.",
-                        ]}
-                    />
+                <Accordion className='flex flex-col gap-4 md:px-5' multiple={false}>
+                    {Object.entries(projects).map(([key, project]) => (
+                        <ProjectItem key={key} {...project} />
+                    ))}
                 </Accordion>
             </section>
             <section className='space-y-4 px-2 max-w-3xl mx-auto'>
                 <h2 ref={techStackRef} className='text-2xl font-bold font-departure-mono uppercase w-fit'>Stack</h2>
-                <TechStack />
+                <div className="grid [grid-template-columns:repeat(auto-fit,minmax(3rem,1fr))] gap-2">
+                    {Object.entries(stack).map(([key, stack]) => (
+                        <TechStackItem key={key} stack={stack} />
+                    ))}
+                </div>
+            </section>
+            <section className="space-y-4 px-2 max-w-3xl mx-auto">
+                <div className="relative z-10 space-y-3 text-center">
+                    <h2 ref={connectTitleRef} className="text-xl w-fit font-medium lg:text-2xl font-departure-mono uppercase">Connect</h2>
+                    <p ref={connectDescriptionRef} className="text-muted-foreground mx-auto max-w-3xl font-light text-sm md:text-md">
+                        You can find me on everywhere with handle @rajaniraiyn Also see all
+                        social links in here
+                    </p>
+                </div>
+                <div className="mx-auto max-w-4xl backdrop-blur-3xl [mask-image:radial-gradient(ellipse_100%_100%_at_50%_0%,#000_70%,transparent_100%)]">
+                    <div ref={connectLinksRef} className="bg-background gap-x-6 grid md:grid-cols-2 dark:bg-muted/50 rounded-xl border px-6 py-3 shadow-xl">
+                        <SocialLink
+                            icon={<GithubIcon />}
+                            name="Github"
+                            link="https://github.com/rajaniraiyn"
+                            description="Explore my open-source projects and code repositories."
+                        />
+                        <SocialLink
+                            icon={<LinkedinIcon />}
+                            name="LinkedIn"
+                            link="https://www.linkedin.com/in/rajaniraiyn/"
+                            description="Connect with me professionally and explore my career journey."
+                        />
+                        <SocialLink
+                            icon={<XIcon />}
+                            name="X"
+                            link="https://x.com/rajaniraiyn"
+                            description="Follow me for design insights, tech updates, and creative content."
+                        />
+                        <SocialLink
+                            icon={<InstagramIcon />}
+                            name="Instagram"
+                            link="https://www.instagram.com/rajaniraiyn/"
+                            description="Visual stories, behind-the-scenes, and creative inspiration."
+                        />
+                        <SocialLink
+                            icon={<YoutubeIcon />}
+                            name="Youtube"
+                            link="https://www.youtube.com/@rajaniraiyn"
+                            description="Watch tutorials, design processes, and creative content."
+                        />
+                        <SocialLink
+                            icon={<DevToIcon />}
+                            name="Dev.to"
+                            link="https://dev.to/rajaniraiyn"
+                            description="Watch tutorials, design processes, and creative content."
+                        />
+                    </div>
+                </div>
+                <p ref={connectFooterRef} className="text-muted-foreground max-w-lg mx-auto text-center font-light text-sm md:text-md">
+                    For partnerships, collaborations, sponsorships, commissions, events,
+                    you can reach out to me at{" "}
+                    <a className="hover:underline text-primary font-semibold" href="mailto:rajaniraiyn@gmail.com">rajaniraiyn@gmail.com</a>
+                </p>
             </section>
             {isGameActive && <Game />}
             {savedWallpaper && <img
@@ -342,18 +286,24 @@ function HighlightedTextWithPreview({ children, previewUrl, isFirst }: { childre
     )
 }
 
-function WorkExperience({ title, company, companyUrl, icon, startDate, endDate }: { title: string, company: string, companyUrl: string, icon: string, startDate: string, endDate: string }) {
+function WorkExperience({ title, company, companyUrl, icon, startDate, endDate, className, ...props }: React.ComponentProps<typeof Card> & Work) {
     const platformRef = useGameElement<HTMLDivElement>({
         type: GameElement.PLATFORM,
         surface: GameSurface.CONCRETE,
     })
+
+
     return (
         <Card
             ref={platformRef}
-            className={cn('p-2 gap-1 last:border-b-1',
+            className={cn(
+                'p-2 gap-1 last:border-b-1',
                 'supports-[corner-shape:squircle]:corner-shape-squircle supports-[corner-shape:squircle]:rounded-4xl',
-                'before:supports-[corner-shape:squircle]:corner-shape-squircle before:supports-[corner-shape:squircle]:rounded-4xl'
-            )}>
+                'before:supports-[corner-shape:squircle]:corner-shape-squircle before:supports-[corner-shape:squircle]:rounded-4xl',
+                className,
+            )}
+            {...props}
+        >
             <CardHeader className="p-0 flex justify-between flex-row flex-wrap items-start gap-2">
                 <Avatar className="sm:size-12 rounded-xl bg-transparent">
                     <AvatarImage src={icon} alt={company} />
@@ -377,7 +327,7 @@ function WorkExperience({ title, company, companyUrl, icon, startDate, endDate }
     )
 }
 
-function Project({ name, github, website, startDate, endDate, description, details }: { name: string, github: string, website: string, startDate: string, endDate: string, description: string, details: string[] }) {
+function ProjectItem({ name, github, website, startDate, endDate, description, details }: Project) {
     const platformRef = useGameElement<HTMLDivElement>({
         type: GameElement.PLATFORM,
         surface: GameSurface.WOOD,
@@ -409,7 +359,7 @@ function Project({ name, github, website, startDate, endDate, description, detai
                 <div>{description}</div>
                 {details && (
                     <ul className="list-disc ml-4 mt-2 space-y-1">
-                        {details.map((item, i) => (
+                        {Children.toArray(details).map((item, i) => (
                             <li key={i}>{item}</li>
                         ))}
                     </ul>
@@ -430,7 +380,7 @@ function ProjectLinks({ github, website }: { github?: string; website?: string }
                     className="text-muted-foreground hover:text-foreground transition-colors"
                     title="View on GitHub"
                 >
-                    <GithubIcon className="size-4" />
+                    <GithubIconLucide className="size-4" />
                 </a>
             )}
             {website && (
@@ -456,26 +406,27 @@ function formatDate(dateStr: string) {
     return `${month} ${year}`
 }
 
-function TechStack() {
-    return (
-        <div className="grid [grid-template-columns:repeat(auto-fit,minmax(3rem,1fr))] gap-2">
-            {Object.entries(stack).map(([key, stack]) => (
-                <TechStackItem key={key} stack={stack} />
-            ))}
-        </div>
-    )
-}
-
 function TechStackItem({ stack }: { stack: Stack }) {
+    const [isTooltipOpen, setIsTooltipOpen] = useState(false)
+    const [isPlayerIn, setIsPlayerIn] = useState(false)
     const platformRef = useGameElement<SVGSVGElement>({
         type: GameElement.PLATFORM,
         surface: GameSurface.WOOD,
         collisionSides: { top: true },
+        events: {
+            onPlayerEnter: () => { setIsPlayerIn(true); setIsTooltipOpen(true) },
+            onPlayerLeave: () => { setIsPlayerIn(false); setIsTooltipOpen(false) },
+        }
     })
     return (
-        <Tooltip delay={0} closeDelay={0} hoverable={false} trackCursorAxis="x">
-            <TooltipTrigger render={<stack.icon ref={platformRef} />} tabIndex={0} className="size-full" />
-            <TooltipPopup className='max-w-3xs flex-col gap-2'>
+        <Tooltip delay={0} closeDelay={0} hoverable={false} trackCursorAxis={isPlayerIn ? 'none' : 'x'} open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
+            <TooltipTrigger render={<stack.icon ref={platformRef} />} tabIndex={0} className="size-full cursor-help" />
+            <TooltipPopup
+                side={isPlayerIn ? 'bottom' : 'top'}
+                // sideOffset={isPlayerIn ? -25 : undefined}
+                align={isPlayerIn ? 'start' : 'center'}
+                className='max-w-3xs flex-col gap-2'
+            >
                 <div>
                     <h3 className="text-lg font-medium">{stack.name}</h3>
                     <p className="text-balance">{stack.description}</p>
@@ -489,3 +440,39 @@ function TechStackItem({ stack }: { stack: Stack }) {
         </Tooltip>
     )
 }
+
+const SocialLink = ({
+    icon,
+    name,
+    link,
+    description,
+}: {
+    icon: React.ReactNode;
+    name: string;
+    link: string;
+    description: string;
+}) => {
+    const platformRef = useGameElement<HTMLAnchorElement>({
+        type: GameElement.PLATFORM,
+        surface: GameSurface.WOOD,
+        collisionSides: { top: true, },
+    })
+    return (
+        <Link
+            ref={platformRef}
+            target="_blank"
+            to={link}
+            className="grid hover:bg-secondary hover:rounded-xl grid-cols-[auto_1fr_auto] items-center rounded-b-none gap-3 border-b border-dashed p-3 last:border-b-0"
+        >
+            <div className="bg-muted border-foreground/5 flex size-12 items-center justify-center rounded-lg border">
+                {icon}
+            </div>
+            <div className="space-y-0.5">
+                <h3 className="text-sm font-medium">{name}</h3>
+                <p className="text-muted-foreground line-clamp-1 text-sm">
+                    {description}
+                </p>
+            </div>
+        </Link>
+    );
+};

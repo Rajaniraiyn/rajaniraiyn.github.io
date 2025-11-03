@@ -1,7 +1,7 @@
 import { Signature } from "@/components/signature";
 import { cn } from "@/lib/utils";
 import { Link, useSearch } from "@tanstack/react-router";
-import { GithubIcon, InstagramIcon, LinkedinIcon, PaletteIcon, Play, TwitterIcon } from "lucide-react";
+import { PaletteIcon, PlayIcon } from "lucide-react";
 
 export function Footer({ className, ...props }: Omit<React.ComponentProps<'footer'>, 'children'>) {
     const isGameActive = useSearch({ strict: false, select: (search) => search.game });
@@ -9,7 +9,7 @@ export function Footer({ className, ...props }: Omit<React.ComponentProps<'foote
     return (
         <footer className={cn('max-w-3xl mx-auto p-3 space-y-4', className)} {...props}>
             {/* Main footer content */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex flex-row flex-wrap items-center justify-around gap-4">
                 {/* Left side - Easter Eggs */}
                 <div className="flex items-center gap-4">
                     {!isGameActive && (
@@ -19,7 +19,7 @@ export function Footer({ className, ...props }: Omit<React.ComponentProps<'foote
                             className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-accent/50"
                             aria-label="Start Adventure"
                         >
-                            <Play className="size-4" />
+                            <PlayIcon className="size-4" />
                         </Link>
                     )}
                     <Link
@@ -31,55 +31,15 @@ export function Footer({ className, ...props }: Omit<React.ComponentProps<'foote
                     </Link>
                 </div>
 
-                {/* Center - Social Links */}
-                <div className="flex items-center gap-4">
-                    <a
-                        href="https://github.com/Rajaniraiyn"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-accent/50"
-                        aria-label="GitHub"
-                    >
-                        <GithubIcon className="size-4" />
-                    </a>
-                    <a
-                        href="https://linkedin.com/in/rajaniraiyn"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-accent/50"
-                        aria-label="LinkedIn"
-                    >
-                        <LinkedinIcon className="size-4" />
-                    </a>
-                    <a
-                        href="https://x.com/rajaniraiyn"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-accent/50"
-                        aria-label="Twitter/X"
-                    >
-                        <TwitterIcon className="size-4" />
-                    </a>
-                    <a
-                        href="https://instagram.com/rajaniraiyn"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-accent/50"
-                        aria-label="Instagram"
-                    >
-                        <InstagramIcon className="size-4" />
-                    </a>
-                </div>
+                {/* Copyright */}
+                {/* <div className="flex justify-center">
+                    <p className="text-xs text-muted-foreground">
+                        &copy; {new Date().getFullYear()} Rajaniraiyn. All rights reserved.
+                    </p>
+                </div> */}
 
                 {/* Right side - Signature */}
                 <Signature className="h-12 w-auto" />
-            </div>
-
-            {/* Copyright */}
-            <div className="flex justify-center">
-                <p className="text-xs text-muted-foreground">
-                    &copy; {new Date().getFullYear()} Rajaniraiyn. All rights reserved.
-                </p>
             </div>
         </footer >
     )

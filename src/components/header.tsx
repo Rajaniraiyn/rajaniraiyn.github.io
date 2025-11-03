@@ -15,7 +15,7 @@ export function Header({ className, ...props }: React.ComponentProps<'header'>) 
         >
             <div className='w-full h-1 bg-background' />
             <div className="max-w-3xl mx-auto">
-                <div className='flex flex-row'>
+                <div className={cn('flex flex-row', { 'justify-center-safe': isWallpaperSaved })}>
                     {isWallpaperSaved && (
                         <svg
                             className='size-7 rotate-z-90'

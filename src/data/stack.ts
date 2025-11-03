@@ -43,14 +43,14 @@ import {
 } from "@/components/icons";
 
 export type Stack = {
-    name: string
+    name: React.ReactNode
     icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
-    description: string | React.ReactNode
+    description: React.ReactNode
     proficiency: number
-    link?: string
+    link?: React.ReactNode
 }
 
-export const stack = {
+export const stack: Record<string, Stack> = {
     // --- Mastered / Daily Use (Proficiency: 0.98 - 1) ---
     typescript: {
         name: 'TypeScript',
@@ -324,4 +324,4 @@ export const stack = {
         description: "Yep, used it to export assets for three.js. Sculpting? I could get something decent eventually... if you give me a few years.",
         proficiency: 0.1,
     },
-} satisfies Record<string, Stack>
+}; 
