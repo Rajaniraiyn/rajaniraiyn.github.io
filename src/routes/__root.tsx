@@ -1,4 +1,5 @@
 import { Footer } from '@/components/footer'
+import { Header } from '@/components/header'
 import { Sidebar } from '@/components/sidebar'
 import { createRootRoute, Outlet } from '@tanstack/react-router'
 import { lazy, Suspense } from 'react'
@@ -14,7 +15,8 @@ function RootComponent() {
     <div className='flex flex-row min-h-screen gap-1'>
       <Sidebar className='hidden' />
       <div className='flex-1 space-y-5'>
-        <main>
+        <Header className='sticky inset-0 bottom-auto z-50 mb-0' />
+        <main className='max-w-3xl mx-auto'>
           <Outlet />
         </main>
         <Footer />

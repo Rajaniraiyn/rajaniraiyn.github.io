@@ -1,6 +1,7 @@
 import { HyperText } from "@/components/ui/hyper-text";
 import { useStorage } from "@/hooks/use-storage";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 export function Header({ className, ...props }: React.ComponentProps<'header'>) {
@@ -8,9 +9,12 @@ export function Header({ className, ...props }: React.ComponentProps<'header'>) 
 
     const isWallpaperSaved = !!savedWallpaper;
 
+    const navigate = useNavigate();
+
     return (
         <header
             className={cn({ "drop-shadow-secondary drop-shadow-md": false, }, className)}
+            onClick={() => navigate({ to: '/' })}
             {...props}
         >
             <div className='w-full h-1 bg-background' />
@@ -79,7 +83,7 @@ function Name({ className }: { className: string }) {
         <HyperText
             as='h3'
             className={cn('text-3xl font-extrabold font-departure-mono uppercase', className)}
-            onClick={() => {
+            onDoubleClick={() => {
                 getSelection()?.removeAllRanges();
                 setNameVersion(prev => prev === "short" ? "long" : "short")
             }}

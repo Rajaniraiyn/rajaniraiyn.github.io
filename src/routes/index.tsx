@@ -4,7 +4,6 @@ import naturePixelArtSrc from '@/assets/wallpapers/nature.jpeg'
 import { Game } from '@/components/cheats/game'
 import { TextHighlighter, type TextHighlighterRef } from "@/components/fancy/text/text-highlighter"
 import { GitHubContributions } from '@/components/github-contributions'
-import { Header } from '@/components/header'
 import { DevToIcon, GithubIcon, InstagramIcon, LinkedinIcon, XIcon, YoutubeIcon } from '@/components/icons'
 import { Accordion, AccordionItem, AccordionPanel, AccordionTrigger } from '@/components/ui/accordion'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -77,8 +76,7 @@ function RouteComponent() {
 
     return (
         <div className='space-y-10 scroll-pt-1'>
-            <Header className='sticky inset-0 bottom-auto z-50 mb-0' />
-            <section className='px-2 max-w-3xl mx-auto'>
+            <section className='px-2'>
                 <h2 className='text-2xl font-bold sr-only'>About</h2>
                 <About />
             </section>
@@ -94,7 +92,7 @@ function RouteComponent() {
                 </Accordion>
 
             </section>
-            <section className='space-y-4 px-2 max-w-3xl mx-auto'>
+            <section className='space-y-4 px-2'>
                 <h2 ref={projectsTitleRef} className='text-2xl font-bold font-departure-mono uppercase w-fit'>Projects</h2>
                 <Accordion className='flex flex-col gap-4 md:px-5' multiple={false}>
                     {Object.entries(projects).map(([key, project]) => (
@@ -102,10 +100,10 @@ function RouteComponent() {
                     ))}
                 </Accordion>
             </section>
-            <section className='space-y-4 px-2 max-w-3xl mx-auto'>
+            <section className='space-y-4 px-2 max-w-screen md:max-w-3xl mx-auto overflow-x-scroll'>
                 <GitHubContributions />
             </section>
-            <section className='space-y-4 px-2 max-w-3xl mx-auto'>
+            <section className='space-y-4 px-2'>
                 <h2 ref={techStackRef} className='text-2xl font-bold font-departure-mono uppercase w-fit'>Stack</h2>
                 <div className="grid [grid-template-columns:repeat(auto-fit,minmax(3rem,1fr))] gap-2">
                     {Object.entries(stack).map(([key, stack]) => (
@@ -113,7 +111,7 @@ function RouteComponent() {
                     ))}
                 </div>
             </section>
-            <section className="space-y-4 px-2 max-w-3xl mx-auto">
+            <section className="space-y-4 px-2">
                 <div className="relative z-10 space-y-3 text-center">
                     <h2 ref={connectTitleRef} className="text-xl w-fit font-medium lg:text-2xl font-departure-mono uppercase">Connect</h2>
                     <p ref={connectDescriptionRef} className="text-muted-foreground mx-auto max-w-3xl font-light text-sm md:text-md">
