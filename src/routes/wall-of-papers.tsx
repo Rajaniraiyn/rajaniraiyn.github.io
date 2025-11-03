@@ -88,7 +88,7 @@ function RouteComponent() {
 
     return (
         <>
-            <div className='scroll-pt-1 pt-2 md:pt-10 px-2'>
+            <div className='scroll-pt-1 pt-2 md:pt-10 px-2 max-w-3xl mx-auto'>
                 <div className='columns-1 sm:columns-2 md:columns-3 gap-4 space-y-4' style={{ columnGap: '1rem' }}>
                     {wallpapers.map((src, index) => (
                         <div
@@ -119,7 +119,7 @@ function RouteComponent() {
             {/* Fullscreen Modal */}
             {selected !== undefined && (
                 <div
-                    className='fixed inset-0 z-50 bg-black/95 backdrop-blur-sm flex items-center justify-center p-4'
+                    className='fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4'
                     onClick={closeFullscreen}
                 >
                     <div
@@ -154,11 +154,11 @@ function RouteComponent() {
                             {/* I like this button */}
                             <Button
                                 onClick={handleLikeWallpaper}
-                                className='bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm gap-2 border-white/20'
-                                variant="outline"
+                                variant="ghost"
+                                className="size-10"
                             >
                                 <Heart className="size-4" />
-                                I like this
+                                <span className="sr-only">Like</span>
                             </Button>
                         </div>
 

@@ -14,6 +14,7 @@ import { stack, type Stack } from "@/data/stack"
 import { useGameElement } from '@/hooks/use-game-element'
 import { useStorage } from '@/hooks/use-storage'
 import { GameElement, GameSurface } from '@/lib/mario-game'
+import { cn } from '@/lib/utils'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import confetti from "canvas-confetti"
 import { BuildingIcon, ExternalLink, GithubIcon } from 'lucide-react'
@@ -52,11 +53,11 @@ function RouteComponent() {
     return (
         <div className='space-y-10 scroll-pt-1'>
             <Header className='sticky inset-0 bottom-auto z-50 mb-0' />
-            <section className='px-2'>
+            <section className='px-2 max-w-3xl mx-auto'>
                 <h2 className='text-2xl font-bold sr-only'>About</h2>
                 <About />
             </section>
-            <section className='space-y-4 px-2'>
+            <section className='space-y-4 px-2 max-w-3xl mx-auto'>
                 <h2 ref={workExperienceTitleRef} className='text-2xl font-bold font-departure-mono uppercase w-fit'>Work Experience</h2>
                 <Accordion className='flex flex-col gap-4 md:px-5' multiple>
                     {/* <WorkExperience
@@ -86,7 +87,7 @@ function RouteComponent() {
                     />
                 </Accordion>
             </section>
-            <section className='space-y-4 px-2'>
+            <section className='space-y-4 px-2 max-w-3xl mx-auto'>
                 <h2 ref={projectsTitleRef} className='text-2xl font-bold font-departure-mono uppercase w-fit'>Projects</h2>
                 <Accordion className='flex flex-col gap-4 md:px-5' multiple>
                     <Project
@@ -214,7 +215,7 @@ function RouteComponent() {
                     />
                 </Accordion>
             </section>
-            <section className='space-y-4 px-2'>
+            <section className='space-y-4 px-2 max-w-3xl mx-auto'>
                 <h2 ref={techStackRef} className='text-2xl font-bold font-departure-mono uppercase w-fit'>Stack</h2>
                 <TechStack />
             </section>

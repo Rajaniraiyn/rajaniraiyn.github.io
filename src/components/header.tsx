@@ -13,49 +13,62 @@ export function Header({ className, ...props }: React.ComponentProps<'header'>) 
             className={cn({ "drop-shadow-secondary drop-shadow-md": false, }, className)}
             {...props}
         >
-            <div className={cn('w-full h-1 bg-background', {
-                'opacity-75': isWallpaperSaved,
-            })} />
-            <div className='flex flex-row'>
-                <Name className={cn('bg-background p-3 rounded-br-4xl', {
-                    'bg-background/75': isWallpaperSaved,
-                })} />
-                <svg
-                    className={cn('size-7', {
-                        'opacity-75': isWallpaperSaved,
-                    })}
-                    viewBox="0 0 30 30"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <g clipPath="url(#clip0_310_2)">
-                        <path d="M30 0H0V30C0 13.431 13.431 0 30 0Z" className='fill-background'>
-                        </path>
-                    </g>
-                    <defs>
-                        <clipPath id="clip0_310_2">
-                            <rect width="30" height="30" fill="white">
-                            </rect>
-                        </clipPath>
-                    </defs>
-                </svg>
+            <div className='w-full h-1 bg-background' />
+            <div className="max-w-3xl mx-auto">
+                <div className='flex flex-row'>
+                    {isWallpaperSaved && (
+                        <svg
+                            className='size-7 rotate-z-90'
+                            viewBox="0 0 30 30"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <g clipPath="url(#clip0_310_2)">
+                                <path d="M30 0H0V30C0 13.431 13.431 0 30 0Z" className='fill-background' />
+                            </g>
+                            <defs>
+                                <clipPath id="clip0_310_2">
+                                    <rect width="30" height="30" fill="white" />
+                                </clipPath>
+                            </defs>
+                        </svg>
+                    )}
+                    <Name className={cn('bg-background p-3 rounded-br-4xl', { 'rounded-bl-4xl': isWallpaperSaved })} />
+                    <svg
+                        className='size-7'
+                        viewBox="0 0 30 30"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <g clipPath="url(#clip0_310_2)">
+                            <path d="M30 0H0V30C0 13.431 13.431 0 30 0Z" className='fill-background'>
+                            </path>
+                        </g>
+                        <defs>
+                            <clipPath id="clip0_310_2">
+                                <rect width="30" height="30" fill="white">
+                                </rect>
+                            </clipPath>
+                        </defs>
+                    </svg>
+                </div>
+                {!isWallpaperSaved && (
+                    <svg
+                        className='size-7'
+                        viewBox="0 0 30 30"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <g clipPath="url(#clip0_310_2)">
+                            <path d="M30 0H0V30C0 13.431 13.431 0 30 0Z" className='fill-background' />
+                        </g>
+                        <defs>
+                            <clipPath id="clip0_310_2">
+                                <rect width="30" height="30" fill="white" />
+                            </clipPath>
+                        </defs>
+                    </svg>
+                )}
             </div>
-            <svg
-                className={cn('size-7', {
-                    'opacity-75': isWallpaperSaved,
-                })}
-                viewBox="0 0 30 30"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                <g clipPath="url(#clip0_310_2)">
-                    <path d="M30 0H0V30C0 13.431 13.431 0 30 0Z" className='fill-background' />
-                </g>
-                <defs>
-                    <clipPath id="clip0_310_2">
-                        <rect width="30" height="30" fill="white" />
-                    </clipPath>
-                </defs>
-            </svg>
         </header>
     )
 }

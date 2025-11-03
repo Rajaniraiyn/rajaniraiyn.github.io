@@ -14,7 +14,7 @@ function RootComponent() {
     <div className='flex flex-row min-h-screen gap-1'>
       <Sidebar className='hidden' />
       <div className='flex-1 space-y-5'>
-        <main className='max-w-3xl mx-auto'>
+        <main>
           <Outlet />
         </main>
         <Footer />
