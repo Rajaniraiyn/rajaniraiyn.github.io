@@ -181,16 +181,18 @@ export function Game() {
                         <TooltipProvider delay={0}>
                             {/* Music Toggle */}
                             <Tooltip>
-                                <TooltipTrigger>
-                                    <Button
-                                        onClick={toggleMusic}
-                                        variant="outline"
-                                        size="sm"
-                                        className="bg-background/95 backdrop-blur-sm border-border/50 shadow-lg hover:bg-accent transition-colors"
-                                    >
-                                        <Music className="size-4" />
-                                    </Button>
-                                </TooltipTrigger>
+                                <TooltipTrigger
+                                    render={
+                                        <Button
+                                            onClick={toggleMusic}
+                                            variant="outline"
+                                            size="sm"
+                                            className="bg-background/95 backdrop-blur-sm border-border/50 shadow-lg hover:bg-accent transition-colors"
+                                        >
+                                            <Music className="size-4" />
+                                        </Button>
+                                    }
+                                />
                                 <TooltipPopup>
                                     {musicEnabled ? 'Disable Background Music' : 'Enable Background Music'}
                                 </TooltipPopup>
@@ -198,20 +200,22 @@ export function Game() {
 
                             {/* Sound Toggle */}
                             <Tooltip>
-                                <TooltipTrigger>
-                                    <Button
-                                        onClick={toggleSound}
-                                        variant="outline"
-                                        size="sm"
-                                        className="bg-background/95 backdrop-blur-sm border-border/50 shadow-lg hover:bg-accent transition-colors"
-                                    >
-                                        {soundEnabled ? (
-                                            <Volume2 className="size-4" />
-                                        ) : (
-                                            <VolumeX className="size-4" />
-                                        )}
-                                    </Button>
-                                </TooltipTrigger>
+                                <TooltipTrigger
+                                    render={
+                                        <Button
+                                            onClick={toggleSound}
+                                            variant="outline"
+                                            size="sm"
+                                            className="bg-background/95 backdrop-blur-sm border-border/50 shadow-lg hover:bg-accent transition-colors"
+                                        >
+                                            {soundEnabled ? (
+                                                <Volume2 className="size-4" />
+                                            ) : (
+                                                <VolumeX className="size-4" />
+                                            )}
+                                        </Button>
+                                    }
+                                />
                                 <TooltipPopup>
                                     {soundEnabled ? 'Disable Game Sounds' : 'Enable Game Sounds'}
                                 </TooltipPopup>
