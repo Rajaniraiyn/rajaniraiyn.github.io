@@ -1,14 +1,10 @@
-import { COMPANIES } from '@/data/works'
-import { createFileRoute } from '@tanstack/react-router'
-import { z } from 'zod/mini'
-import { works } from '@/data/works'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
-import { BuildingIcon, ExternalLink, CalendarIcon } from 'lucide-react'
-import { Link } from '@tanstack/react-router'
-import { cn } from '@/lib/utils'
+import { Card, CardContent } from '@/components/ui/card'
+import { COMPANIES, works } from '@/data/works'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { BuildingIcon, CalendarIcon, ExternalLink } from 'lucide-react'
+import { z } from 'zod/mini'
 
 const validateParams = z.object({
     company: z.enum(COMPANIES),
