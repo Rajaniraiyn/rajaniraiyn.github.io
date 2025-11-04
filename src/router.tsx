@@ -4,7 +4,10 @@ import { MotionProvider } from '@/contexts/motion'
 import { TabBarProvider } from '@/contexts/tabbar'
 import { ThemeProvider } from '@/contexts/theme'
 import { createHashHistory, createRouter } from '@tanstack/react-router'
+import { lazy, Suspense } from 'react'
 import { routeTree } from './routeTree.gen'
+
+const LazyToastProvider = lazy(() => import('@/components/ui/toast').then(module => ({ default: module.ToastProvider })))
 
 export function getRouter() {
     const router = createRouter({
@@ -18,6 +21,9 @@ export function getRouter() {
                     <MotionProvider>
                         <GameProvider>
                             {children}
+                            <Suspense>
+                                <LazyToastProvider position="bottom-center" />
+                            </Suspense>
                         </GameProvider>
                     </MotionProvider>
                 </TooltipProvider>

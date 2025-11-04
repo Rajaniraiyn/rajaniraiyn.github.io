@@ -9,7 +9,9 @@ import { Accordion, AccordionItem, AccordionPanel, AccordionTrigger } from '@/co
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress, ProgressIndicator, ProgressTrack } from "@/components/ui/progress"
+import { toastManager } from '@/components/ui/toast'
 import { Tooltip, TooltipPopup, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { useGame } from '@/contexts/game'
 import { useTheme } from '@/contexts/theme'
 import { projects, type Project, type Project as ProjectItem } from "@/data/projects"
 import { stack, type Stack } from "@/data/stack"
@@ -212,6 +214,14 @@ function About() {
 function HighlightedTextWithPreview({ children, previewUrl, isFirst }: { children: ReactNode, previewUrl?: string, isFirst?: boolean }) {
     const { resolvedTheme } = useTheme();
 
+    const { stopGame } = useGame();
+    const navigate = Route.useNavigate();
+
+    const handleStopGame = useCallback(() => {
+        stopGame();
+        navigate({ to: '/', search: {}, replace: true, resetScroll: false });
+    }, [stopGame, navigate]);
+
     const registerPlatform = useGameElement<HTMLElement>({
         type: GameElement.PLATFORM,
         collisionSides: { top: true },
@@ -245,12 +255,22 @@ function HighlightedTextWithPreview({ children, previewUrl, isFirst }: { childre
                         requestAnimationFrame(frame);
                     }
                 };
+                toastManager.add({
+                    id: "pinnacle-reached",
+                    type: "success",
+                    title: "You reached the pinnacle!",
+                    description: "Hope you enjoyed the journey!",
+                    priority: "high",
+                    timeout: duration + 1000,
+                    onRemove: handleStopGame,
+                })
 
                 frame();
             },
             onPlayerLeave: (_payload) => {
                 console.log("player left top");
                 // Confetti automatically disappears, no cleanup needed
+                toastManager.close("pinnacle-reached");
             },
         } : undefined,
     })
