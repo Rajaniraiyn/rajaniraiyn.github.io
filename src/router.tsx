@@ -15,6 +15,7 @@ export function getRouter() {
         routeTree,
         defaultPreload: 'intent',
         scrollRestoration: true,
+        defaultStructuralSharing: true,
         Wrap: ({ children }) => (
             <ThemeProvider>
                 <TooltipProvider>
