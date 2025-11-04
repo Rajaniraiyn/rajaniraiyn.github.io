@@ -133,7 +133,6 @@
   --warning-foreground: oklch(0.828 0.189 84.429);
 }
 
-
 @layer base {
   * {
     @apply border-border outline-ring/50;

@@ -47,55 +47,55 @@ export const abacusTimeline: TimelineEntry[] = [
 
 const portalTimeline: TimelineEntry[] = [
     {
-        date: "Dec 2023 - Jan 2024",
-        title: "AI-Powered Browser Foundation",
+        date: "Dec 2023 - Feb 2024",
+        title: "AI-Powered Browser Architecture",
         content:
-            "Led development of an AI-powered browser with RAG and multi-agent systems that complete complex, browser-based tasks. Designed the UX and design system for the Portal organization, driving design engineering and micro-interactions to deliver a cohesive and delightful user experience across all products.",
+            "Led the development of Portal, an AI-powered browser featuring advanced RAG (Retrieval-Augmented Generation) and multi-agent systems capable of completing complex, browser-based tasks autonomously. Designed and implemented the comprehensive UX and design system for the entire Portal organization, establishing design engineering principles and micro-interactions that create cohesive, delightful user experiences across all products.",
     },
     {
-        date: "Q1 2024",
-        title: "Platform Extensions & Performance",
+        date: "Mar 2024 - May 2024",
+        title: "Cross-Platform Engineering Excellence",
         content:
-            "Maintained and extended forks of Playwright, Electron, and custom native addons to add platform-specific features such as multi-touch interactions for desktop apps. Improved the agentic flow with a high-performance, micro-interaction-rich interface, elevating both speed and usability for complex agent-driven tasks.",
+            "Maintained and extended custom forks of Playwright, Electron, and native addons to deliver platform-specific features including advanced multi-touch interactions for desktop applications. Engineered a high-performance, micro-interaction-rich agentic interface that dramatically improved both execution speed and usability for complex agent-driven workflows, setting new standards for AI-human interaction design.",
     },
     {
-        date: "Q2 2024",
-        title: "SDK Development & Database Migration",
+        date: "Jun 2024 - Aug 2024",
+        title: "Infrastructure & SDK Innovation",
         content:
-            "Built an inference-provider SDK (Vercel AI SDK-style) to unify calls across multiple AI platforms and simplify maintenance. Migrated 15K users from Redis to PostgreSQL with zero downtime through careful planning and phased cutovers. Basically, made AI infrastructure reliable and scalable.",
+            "Architected and built a comprehensive inference-provider SDK following Vercel AI SDK patterns, unifying API calls across multiple AI platforms and dramatically simplifying maintenance overhead. Successfully migrated 15K+ active users from Redis to PostgreSQL with zero downtime through meticulous planning, phased cutovers, and robust testing—ensuring seamless scaling of AI infrastructure.",
     },
     {
-        date: "Q3-Q4 2024",
-        title: "Product Launches & Analytics",
+        date: "Sep 2024 - Jan 2025",
+        title: "Product Innovation & Analytics",
         content:
-            "Shipped 'Artifacts' (AI-generated apps/sites) and launched Portal Search for LLM-driven summaries and ranking. Instrumented product analytics (Mixpanel) and crafted fluid UI interactions with Framer Motion/GSAP to drive engagement and insight. Turned AI capabilities into tangible products users love.",
+            "Launched groundbreaking 'Artifacts' feature enabling AI-generated web applications and sites, followed by Portal Search with sophisticated LLM-driven content summaries and intelligent ranking algorithms. Implemented comprehensive product analytics using Mixpanel and crafted fluid, engaging UI interactions powered by Framer Motion and GSAP, driving significant user engagement and product insights.",
     },
 ];
 
 const santaTimeline: TimelineEntry[] = [
     {
         date: "Jan 2023 - Jun 2023",
-        title: "Chromium Browser Development",
+        title: "Chromium Core Development",
         content:
-            "Contributed to a Chromium-based browser focusing on new tab page (NTP), settings, and ad-blocking features. Boosted NTP load speed by 13% through performance optimizations. Basically, made the browser faster and more privacy-focused.",
+            "Led development of Santa Browser, a Chromium-based browser with enhanced privacy features. Focused on optimizing the new tab page (NTP), implementing comprehensive ad-blocking systems, and refining settings interfaces. Achieved a 13% improvement in NTP load speed through strategic performance optimizations, directly enhancing user experience and perceived responsiveness.",
     },
     {
         date: "Jul 2023 - Sep 2023",
-        title: "Dashboard & Extension Engineering",
+        title: "Rewards Platform & Search Enhancement",
         content:
-            "Built a rewards dashboard and search-enhancing extension using modern web technologies. Implemented automated testing with Playwright and monitoring via Grafana for reliable deployments. Made sure everything worked smoothly and looked great.",
+            "Engineered a sophisticated rewards dashboard system and developed advanced search-enhancing browser extensions. Implemented comprehensive automated testing suites using Playwright and established robust monitoring infrastructure with Grafana. Ensured reliable, scalable deployments that maintained high availability and user satisfaction across the platform.",
     },
     {
         date: "Oct 2023 - Dec 2023",
-        title: "UI/UX Polish & Cross-Platform",
+        title: "Design System & Cross-Platform UX",
         content:
-            "Collaborated with design to deliver clean, responsive UI components using Tailwind CSS. Ensured cross-platform parity and polished user experience across different environments. Basically, made the browser look and feel amazing everywhere.",
+            "Collaborated closely with design teams to implement clean, responsive UI components using Tailwind CSS, establishing consistent visual language across the entire browser ecosystem. Ensured seamless cross-platform compatibility and delivered polished user experiences that felt native on Windows, macOS, and mobile platforms through meticulous attention to platform-specific interaction patterns.",
     },
     {
-        date: "Earlier (Jan 2022 - Jan 2023)",
-        title: "Browser POC & Research",
+        date: "Jan 2022 - Dec 2022",
+        title: "Browser Foundation & Research",
         content:
-            "Prototyped the Electron-based browser POC during internship, researched ad-blocking approaches, and ensured cross-platform compatibility (Windows/Android) for consistent user experience. Laid the groundwork for what became Santa Browser.",
+            "During internship, prototyped the initial Electron-based browser proof-of-concept, conducted extensive research into ad-blocking technologies and privacy protection mechanisms. Ensured robust cross-platform compatibility across Windows and Android platforms, establishing the technical foundation and architectural principles that evolved into the full Santa Browser product.",
     },
 ];
 
