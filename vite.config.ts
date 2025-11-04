@@ -5,6 +5,7 @@ import { defineConfig } from 'vite';
 import { ViteWebfontDownload } from 'vite-plugin-webfont-dl';
 
 export default defineConfig({
+  base: './',
   resolve: {
     tsconfigPaths: true,
     dedupe: ['react', 'react-dom'],
