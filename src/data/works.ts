@@ -1,3 +1,5 @@
+import SantaBrowserIcon from '@/assets/images/santabrowser-favicon.svg'
+
 export type TimelineEntry = {
     date: string;
     title: string;
@@ -122,7 +124,7 @@ export const works: { [key in Company]: Work } = {
         title: 'Software Developer',
         company: 'Santa Browser',
         companyUrl: 'https://santabrowser.com',
-        icon: '/src/assets/images/santabrowser-favicon.svg',
+        icon: SantaBrowserIcon,
         startDate: "2023-01-01",
         endDate: "2023-12-01",
         timeline: santaTimeline,
