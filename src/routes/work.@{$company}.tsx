@@ -29,7 +29,6 @@ function RouteComponent() {
 
     return (
         <div className='space-y-8 scroll-pt-1 px-2'>
-            {/* Header Section */}
             <section className='space-y-6'>
                 <div className='flex flex-col items-center space-y-4 text-center'>
                     <Avatar className="size-20 sm:size-24 rounded-2xl bg-muted border-2 border-border">
@@ -63,51 +62,27 @@ function RouteComponent() {
                         </div>
                     </div>
                 </div>
-
-                {/* Company Description */}
-                <Card className='max-w-2xl mx-auto border-none bg-card/50'>
-                    <CardContent className='p-6'>
-                        <div className="prose dark:prose-invert prose-sm max-w-none text-center">
-                            {work.company === 'portal' && (
-                                <p className="text-muted-foreground leading-relaxed">
-                                    Building the future of web interaction through AI-powered browsing.
-                                    Portal combines advanced RAG systems, multi-agent architectures, and
-                                    seamless UX design to transform how users interact with the web.
-                                </p>
-                            )}
-                            {work.company === 'santa' && (
-                                <p className="text-muted-foreground leading-relaxed">
-                                    Crafting privacy-focused browsers with cutting-edge performance.
-                                    Santa Browser delivers Chromium-powered browsing with enhanced
-                                    security, custom features, and a delightful user experience.
-                                </p>
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
             </section>
 
-            {/* Timeline Section */}
             <section className='space-y-6'>
                 <h2 className='text-xl font-bold font-departure-mono uppercase tracking-tight text-center'>
                     Journey Timeline
                 </h2>
 
                 <div className="relative mx-auto max-w-4xl">
-                    {/* Timeline line */}
-                    <div className="absolute left-6 top-0 bottom-0 w-px bg-border" />
+                    <div className="absolute left-[23px] top-4 bottom-4 w-px bg-border sm:left-[27px]" aria-hidden />
 
-                    <div className="space-y-8">
+                    <div className="space-y-6">
                         {work.timeline.map((entry, index) => (
-                            <div key={index} className="relative flex gap-6">
-                                {/* Timeline dot */}
-                                <div className="relative z-10 flex size-12 items-center justify-center rounded-full bg-background border-2 border-primary shadow-sm">
-                                    <div className="size-3 rounded-full bg-primary" />
+                            <article key={`${entry.date}-${index}`} className="grid grid-cols-[48px_1fr] gap-4 sm:grid-cols-[56px_1fr] sm:gap-6">
+                                <div className="relative flex items-start justify-center pt-1">
+                                    <div className="relative z-10 flex size-12 items-center justify-center rounded-full bg-background border-2 border-primary shadow-sm">
+                                        <div className="size-3 rounded-full bg-primary" />
+                                    </div>
                                 </div>
 
-                                {/* Content */}
-                                <div className="flex-1 space-y-3 pb-8">
-                                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                                <div className="space-y-3 pb-2">
+                                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                                         <h3 className="text-lg font-semibold tracking-tight">
                                             {entry.title}
                                         </h3>
@@ -118,14 +93,13 @@ function RouteComponent() {
 
                                     <Card className='border-border/50 bg-card/30 backdrop-blur-sm'>
                                         <CardContent className="p-4">
-                                            <div
-                                                className="prose dark:prose-invert prose-sm max-w-none text-muted-foreground leading-relaxed"
-                                                dangerouslySetInnerHTML={{ __html: entry.content }}
-                                            />
+                                            <p className="text-sm leading-relaxed text-muted-foreground">
+                                                {entry.content}
+                                            </p>
                                         </CardContent>
                                     </Card>
                                 </div>
-                            </div>
+                            </article>
                         ))}
                     </div>
                 </div>
