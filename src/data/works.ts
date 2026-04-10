@@ -102,15 +102,15 @@ const santaTimeline: TimelineEntry[] = [
 ];
 
 export const works: { [key in Company]: Work } = {
-    // abacus: {
-    //     title: 'Desktop Application Developer',
-    //     company: 'Abacus',
-    //     companyUrl: 'https://abacus.ai',
-    //     icon: "https://www.google.com/s2/favicons?domain=abacus.ai&sz=128",
-    //     startDate: "2025-01-01",
-    //     endDate: 'Present',
-    //     timeline: abacusTimeline,
-    // },
+    abacus: {
+        title: 'Desktop Application Developer',
+        company: 'Abacus',
+        companyUrl: 'https://abacus.ai',
+        icon: "https://www.google.com/s2/favicons?domain=abacus.ai&sz=128",
+        startDate: "2025-01-01",
+        endDate: 'Present',
+        timeline: abacusTimeline,
+    },
     portal: {
         title: 'Founding Engineer',
         company: 'Portal',
