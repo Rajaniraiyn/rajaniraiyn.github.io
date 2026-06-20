@@ -1,4 +1,4 @@
-import { Toast } from "@base-ui-components/react/toast"
+import { Toast } from "@base-ui/react/toast"
 import {
   CircleAlertIcon,
   CircleCheckIcon,
@@ -8,7 +8,7 @@ import {
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button-variants"
 
 const toastManager = Toast.createToastManager()
 

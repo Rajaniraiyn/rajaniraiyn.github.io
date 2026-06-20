@@ -1,13 +1,57 @@
-import { Tooltip as TooltipPrimitive } from "@base-ui-components/react/tooltip"
+import * as React from "react"
+import { Tooltip as TooltipPrimitive } from "@base-ui/react/tooltip"
 
 import { cn } from "@/lib/utils"
 
 const TooltipProvider = TooltipPrimitive.Provider
 
-const Tooltip = TooltipPrimitive.Root
+const TooltipTimingContext = React.createContext<{
+  delay?: number
+  closeDelay?: number
+}>({})
 
-function TooltipTrigger(props: TooltipPrimitive.Trigger.Props) {
-  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />
+type TooltipProps = TooltipPrimitive.Root.Props & {
+  delay?: number
+  closeDelay?: number
+  hoverable?: boolean
+}
+
+function Tooltip({
+  delay,
+  closeDelay,
+  hoverable,
+  disableHoverablePopup,
+  ...props
+}: TooltipProps) {
+  const resolvedDisableHoverablePopup =
+    disableHoverablePopup ??
+    (hoverable === false ? true : hoverable === true ? false : undefined)
+
+  return (
+    <TooltipTimingContext.Provider value={{ delay, closeDelay }}>
+      <TooltipPrimitive.Root
+        disableHoverablePopup={resolvedDisableHoverablePopup}
+        {...props}
+      />
+    </TooltipTimingContext.Provider>
+  )
+}
+
+function TooltipTrigger({
+  delay,
+  closeDelay,
+  ...props
+}: TooltipPrimitive.Trigger.Props) {
+  const timing = React.useContext(TooltipTimingContext)
+
+  return (
+    <TooltipPrimitive.Trigger
+      data-slot="tooltip-trigger"
+      delay={delay ?? timing.delay}
+      closeDelay={closeDelay ?? timing.closeDelay}
+      {...props}
+    />
+  )
 }
 
 function TooltipPopup({

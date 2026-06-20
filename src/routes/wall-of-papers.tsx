@@ -18,10 +18,11 @@ import urbanSkyscrapersPortraitUrl from "@/assets/wallpapers/urban-skyscrapers-p
 import waterfallPortraitUrl from "@/assets/wallpapers/waterfall-portrait.jpeg?url";
 import winterLandscapePortraitUrl from "@/assets/wallpapers/winter-landscape-portrait.jpeg?url";
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogPopup } from '@/components/ui/dialog';
 import { useStorage } from '@/hooks/use-storage';
 import { createFileRoute } from '@tanstack/react-router';
-import { Heart } from 'lucide-react';
-import { useCallback, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, Heart, X } from 'lucide-react';
+import { useCallback } from 'react';
 import { z } from 'zod/mini';
 
 export const Route = createFileRoute('/wall-of-papers')({
@@ -56,7 +57,7 @@ const wallpapers = [
 function RouteComponent() {
     const { i: selected } = Route.useSearch()
     const navigate = Route.useNavigate()
-    const [_, setSavedWallpaper] = useStorage<string | null>('favorite-wallpaper', { defaultValue: null })
+    const [, setSavedWallpaper] = useStorage<string | null>('favorite-wallpaper', { defaultValue: null })
 
     const openFullscreen = useCallback((index: number) => {
         navigate({ search: { i: index }, replace: true as const })
@@ -73,18 +74,23 @@ function RouteComponent() {
         }
     }, [selected, navigate, setSavedWallpaper])
 
-    const handleKeyDown = useCallback((e: KeyboardEvent) => {
-        if (e.key === 'Escape' && selected !== undefined) {
+    const handleDialogOpenChange = useCallback((open: boolean) => {
+        if (!open) {
             closeFullscreen()
         }
-    }, [selected, closeFullscreen])
+    }, [closeFullscreen])
 
-    useEffect(() => {
+    const goToPrevious = useCallback(() => {
         if (selected !== undefined) {
-            document.addEventListener('keydown', handleKeyDown)
-            return () => document.removeEventListener('keydown', handleKeyDown)
+            openFullscreen(selected > 0 ? selected - 1 : wallpapers.length - 1)
         }
-    }, [selected, handleKeyDown])
+    }, [selected, openFullscreen])
+
+    const goToNext = useCallback(() => {
+        if (selected !== undefined) {
+            openFullscreen(selected < wallpapers.length - 1 ? selected + 1 : 0)
+        }
+    }, [selected, openFullscreen])
 
     return (
         <>
@@ -118,76 +124,73 @@ function RouteComponent() {
                 </div>
             </div>
 
-            {/* Fullscreen Modal */}
-            {selected !== undefined && (
-                <div
-                    className='fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4'
-                    onClick={closeFullscreen}
+            <Dialog open={selected !== undefined} onOpenChange={handleDialogOpenChange}>
+                <DialogPopup
+                    showCloseButton={false}
+                    backdropClassName="bg-black/75"
+                    containerClassName="pointer-events-none"
+                    positionerClassName="flex h-full w-full flex-row items-center justify-center overflow-hidden p-4 pointer-events-none pt-0 before:hidden after:hidden max-sm:before:hidden sm:overflow-hidden sm:p-4 sm:before:basis-0 sm:after:flex-none"
+                    className="pointer-events-auto relative flex h-full max-h-full w-full max-w-7xl items-center justify-center border-none bg-transparent p-0 shadow-none sm:max-w-7xl sm:scale-100 sm:rounded-none before:hidden dark:before:hidden"
                 >
-                    <div
-                        className='relative max-w-7xl max-h-full w-full h-full flex items-center justify-center'
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <img
-                            src={wallpapers[selected]}
-                            alt={`Wallpaper ${selected + 1}`}
-                            className='max-w-full max-h-full object-contain rounded-lg shadow-2xl'
-                            style={{ imageRendering: 'pixelated' }}
-                            decoding="async"
-                        />
+                    {selected !== undefined && (
+                        <>
+                            <img
+                                src={wallpapers[selected]}
+                                alt={`Wallpaper ${selected + 1}`}
+                                className='max-h-full max-w-full rounded-lg object-contain shadow-2xl'
+                                style={{ imageRendering: 'pixelated' }}
+                                decoding="async"
+                            />
 
-                        {/* Close button */}
-                        <button
-                            onClick={closeFullscreen}
-                            className='absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors duration-200 backdrop-blur-sm'
-                            aria-label="Close fullscreen"
-                        >
-                            <svg className='w-6 h-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
-                            </svg>
-                        </button>
+                            <Button
+                                onClick={closeFullscreen}
+                                variant="ghost"
+                                size="icon"
+                                className="absolute top-4 right-4 size-10 rounded-full bg-black/50 text-white backdrop-blur-sm hover:bg-black/70"
+                                aria-label="Close fullscreen"
+                            >
+                                <X className="size-6" />
+                            </Button>
 
-                        {/* Bottom controls */}
-                        <div className='absolute bottom-4 left-0 right-0 flex items-center justify-between px-4 gap-4'>
-                            {/* Image counter */}
-                            <div className='bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full text-white text-sm'>
-                                {selected + 1} / {wallpapers.length}
+                            <div className='absolute bottom-4 left-0 right-0 flex items-center justify-between gap-4 px-4'>
+                                <div className='rounded-full bg-black/50 px-4 py-2 text-sm text-white backdrop-blur-sm'>
+                                    {selected + 1} / {wallpapers.length}
+                                </div>
+
+                                <Button
+                                    onClick={handleLikeWallpaper}
+                                    variant="ghost"
+                                    size="icon"
+                                    className="size-10 rounded-full bg-black/50 text-white backdrop-blur-sm hover:bg-black/70"
+                                >
+                                    <Heart className="size-4" />
+                                    <span className="sr-only">Like</span>
+                                </Button>
                             </div>
 
-                            {/* I like this button */}
                             <Button
-                                onClick={handleLikeWallpaper}
+                                onClick={goToPrevious}
                                 variant="ghost"
-                                className="size-10"
+                                size="icon"
+                                className="absolute left-4 top-1/2 size-12 -translate-y-1/2 rounded-full bg-black/50 text-white backdrop-blur-sm hover:bg-black/70"
+                                aria-label="Previous image"
                             >
-                                <Heart className="size-4" />
-                                <span className="sr-only">Like</span>
+                                <ChevronLeft className="size-6" />
                             </Button>
-                        </div>
 
-                        {/* Navigation arrows */}
-                        <button
-                            onClick={() => openFullscreen(selected > 0 ? selected - 1 : wallpapers.length - 1)}
-                            className='absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full w-12 h-12 flex items-center justify-center transition-colors duration-200 backdrop-blur-sm'
-                            aria-label="Previous image"
-                        >
-                            <svg className='w-6 h-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 19l-7-7 7-7' />
-                            </svg>
-                        </button>
-
-                        <button
-                            onClick={() => openFullscreen(selected < wallpapers.length - 1 ? selected + 1 : 0)}
-                            className='absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full w-12 h-12 flex items-center justify-center transition-colors duration-200 backdrop-blur-sm'
-                            aria-label="Next image"
-                        >
-                            <svg className='w-6 h-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 5l7 7-7 7' />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            )}
+                            <Button
+                                onClick={goToNext}
+                                variant="ghost"
+                                size="icon"
+                                className="absolute right-4 top-1/2 size-12 -translate-y-1/2 rounded-full bg-black/50 text-white backdrop-blur-sm hover:bg-black/70"
+                                aria-label="Next image"
+                            >
+                                <ChevronRight className="size-6" />
+                            </Button>
+                        </>
+                    )}
+                </DialogPopup>
+            </Dialog>
         </>
     )
 }
