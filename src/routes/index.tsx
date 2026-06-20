@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress, ProgressIndicator, ProgressTrack } from "@/components/ui/progress"
 import { Tooltip, TooltipPopup, TooltipTrigger } from '@/components/ui/tooltip'
 import { useTheme } from '@/contexts/theme'
-import { dispatchSummitLeave, dispatchSummitReached, useGameProgress } from '@/data/game-progress'
+import { dispatchSummitLeave, dispatchSummitReached, hasCompletedGameProgress, useGameProgress } from '@/data/game-progress'
 import { projects, type Project, type Project as ProjectItem } from "@/data/projects"
 import { stack, type Stack } from "@/data/stack"
 import { works, type Work } from "@/data/works"
@@ -259,7 +259,7 @@ function HighlightedTextWithPreview({ children, isFirst }: { children: ReactNode
         surface: GameSurface.CARPET,
         events: isFirst ? {
             onPlayerEnter: () => {
-                if (hasCompletedGame) return;
+                if (hasCompletedGame || hasCompletedGameProgress()) return;
 
                 setHasCompletedGame(true);
                 dispatchSummitReached();

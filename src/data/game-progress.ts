@@ -16,6 +16,16 @@ export function dispatchSummitLeave() {
     window.dispatchEvent(new CustomEvent(GAME_SUMMIT_LEAVE_EVENT));
 }
 
+export function hasCompletedGameProgress(storage: Storage = localStorage): boolean {
+    try {
+        const json = storage.getItem(GAME_PROGRESS_STORAGE_KEY);
+        if (json === null) return false;
+        return JSON.parse(json) === true;
+    } catch {
+        return false;
+    }
+}
+
 export function useGameProgress() {
     return useStorage<boolean>(GAME_PROGRESS_STORAGE_KEY, { defaultValue: false });
 }
