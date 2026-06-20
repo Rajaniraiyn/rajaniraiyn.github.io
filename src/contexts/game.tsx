@@ -8,7 +8,6 @@ const NOOP_SOUND: GameSoundHandler = () => { };
 type CreateGameSoundHandler = typeof import("@/lib/mario-game").createGameSoundHandler;
 
 export interface GameContextType {
-    game: MarioGame | null;
     isRunning: boolean;
     soundEnabled: boolean;
     musicEnabled: boolean;
@@ -270,10 +269,9 @@ export function GameProvider({ children, options }: { children: React.ReactNode;
     }, []);
 
     const updateOptions = applyOptions;
-    const game = gameRef.current;
 
     return (
-        <GameContext.Provider value={{ game, isRunning, soundEnabled, musicEnabled, addPlayer, addElement, updateOptions, options: currentOptions, startGame, stopGame, toggleSound, toggleMusic }}>
+        <GameContext.Provider value={{ isRunning, soundEnabled, musicEnabled, addPlayer, addElement, updateOptions, options: currentOptions, startGame, stopGame, toggleSound, toggleMusic }}>
             {children}
         </GameContext.Provider>
     );
