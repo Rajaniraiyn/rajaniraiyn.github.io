@@ -1,7 +1,12 @@
 import { useCallback } from "react";
 import { useSyncExternalStore } from "react";
 
-const STORAGE_CHANGE_EVENT_KEY = "__storage-change"
+const STORAGE_CHANGE_EVENT = "__storage-change";
+
+interface StorageChangeDetail {
+    key: string;
+    storageArea: Storage;
+}
 
 export function useStorage<T>(
     key: string,
@@ -14,13 +19,23 @@ export function useStorage<T>(
     }
 ) {
     const subscribe = useCallback((onStoreChange: () => void) => {
-        const handler = (event: StorageEvent) => {
+        const onNativeStorage = (event: StorageEvent) => {
             if (event.storageArea === storage && event.key === key) {
                 onStoreChange();
             }
         };
-        window.addEventListener('storage', handler);
-        return () => window.removeEventListener('storage', handler);
+        const onCustomStorage = (event: Event) => {
+            const detail = (event as CustomEvent<StorageChangeDetail>).detail;
+            if (detail.storageArea === storage && detail.key === key) {
+                onStoreChange();
+            }
+        };
+        window.addEventListener("storage", onNativeStorage);
+        window.addEventListener(STORAGE_CHANGE_EVENT, onCustomStorage);
+        return () => {
+            window.removeEventListener("storage", onNativeStorage);
+            window.removeEventListener(STORAGE_CHANGE_EVENT, onCustomStorage);
+        };
     }, [key, storage]);
 
     const getSnapshot = useCallback((): T => {
@@ -43,8 +58,11 @@ export function useStorage<T>(
                 ? (newValue as (prev: T) => T)(getSnapshot())
                 : newValue;
         storage.setItem(key, JSON.stringify(valueToStore));
-        // For our own tab:
-        window.dispatchEvent(new StorageEvent(STORAGE_CHANGE_EVENT_KEY, { key, storageArea: storage }));
+        window.dispatchEvent(
+            new CustomEvent<StorageChangeDetail>(STORAGE_CHANGE_EVENT, {
+                detail: { key, storageArea: storage },
+            }),
+        );
     }, [key, storage, getSnapshot]);
 
     return [value, setValue] as const;

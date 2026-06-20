@@ -1,6 +1,3 @@
-import santaBrowserFaviconSrc from '@/assets/images/santabrowser-favicon.svg'
-import gameTowerPixelArtSrc from '@/assets/wallpapers/game-tower.jpeg'
-import naturePixelArtSrc from '@/assets/wallpapers/nature.jpeg'
 import { TextHighlighter, type TextHighlighterRef } from "@/components/fancy/text/text-highlighter"
 import { DevToIcon, GithubIcon, InstagramIcon, LinkedinIcon, XIcon, YoutubeIcon } from '@/components/icons'
 import { Accordion, AccordionItem, AccordionPanel, AccordionTrigger } from '@/components/ui/accordion'
@@ -8,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress, ProgressIndicator, ProgressTrack } from "@/components/ui/progress"
 import { toastManager } from '@/components/ui/toast'
-import { Tooltip, TooltipPopup, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipPopup, TooltipTrigger } from '@/components/ui/tooltip'
 import { useGame } from '@/contexts/game'
 import { useTheme } from '@/contexts/theme'
 import { projects, type Project, type Project as ProjectItem } from "@/data/projects"
@@ -16,6 +13,7 @@ import { stack, type Stack } from "@/data/stack"
 import { works, type Work } from "@/data/works"
 import { useGameElement } from '@/hooks/use-game-element'
 import { GameElement, GameSurface } from '@/lib/mario-game'
+import { formatDate } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { BuildingIcon, ExternalLink, GithubIcon as GithubIconLucide } from 'lucide-react'
@@ -222,39 +220,37 @@ function About() {
 
     return (
         <div className="space-y-3">
-            <TooltipProvider delay={0}>
-                <p>
-                    Dynamic and versatile engineer with {careerYears}+ years of experience specializing in frontend and desktop application development, with a strong focus on{" "}
-                    <HighlightedTextWithPreview previewUrl={naturePixelArtSrc} isFirst>interaction engineering and user experience</HighlightedTextWithPreview>
-                    .
-                </p>
-                <p>
-                    I architect impactful solutions, lead technical direction, and obsess over the details that elevate digital products—from{" "}
-                    <HighlightedTextWithPreview previewUrl={gameTowerPixelArtSrc}>microinteractions</HighlightedTextWithPreview>{" "}
-                    to{" "}
-                    <HighlightedTextWithPreview previewUrl={naturePixelArtSrc}>robust design systems</HighlightedTextWithPreview>
-                    . Whether it’s building browsers, enhancing developer tools, or creating open-source projects, I bring ideas to life through{" "}
-                    <HighlightedTextWithPreview previewUrl={naturePixelArtSrc}>thoughtful design and meticulous engineering</HighlightedTextWithPreview>
-                    .
-                </p>
-                <p>
-                    My expertise bridges product vision and implementation—contributing to{" "}
-                    <HighlightedTextWithPreview previewUrl={santaBrowserFaviconSrc}>Chromium-based browsers</HighlightedTextWithPreview>
-                    , engineering full-stack platforms, and integrating{" "}
-                    <HighlightedTextWithPreview previewUrl={naturePixelArtSrc}>AI capabilities for next-generation user experiences</HighlightedTextWithPreview>
-                    . I thrive on tackling complex problems and delivering well-crafted solutions that scale.
-                </p>
-                <p>
-                    I’m always exploring new technologies, mentoring teams, and advancing the craft of{" "}
-                    <HighlightedTextWithPreview previewUrl={naturePixelArtSrc}>developer experience and interaction design</HighlightedTextWithPreview>
-                    . Let’s push boundaries and build incredible products.
-                </p>
-            </TooltipProvider>
+            <p>
+                Dynamic and versatile engineer with {careerYears}+ years of experience specializing in frontend and desktop application development, with a strong focus on{" "}
+                <HighlightedTextWithPreview isFirst>interaction engineering and user experience</HighlightedTextWithPreview>
+                .
+            </p>
+            <p>
+                I architect impactful solutions, lead technical direction, and obsess over the details that elevate digital products—from{" "}
+                <HighlightedTextWithPreview>microinteractions</HighlightedTextWithPreview>{" "}
+                to{" "}
+                <HighlightedTextWithPreview>robust design systems</HighlightedTextWithPreview>
+                . Whether it’s building browsers, enhancing developer tools, or creating open-source projects, I bring ideas to life through{" "}
+                <HighlightedTextWithPreview>thoughtful design and meticulous engineering</HighlightedTextWithPreview>
+                .
+            </p>
+            <p>
+                My expertise bridges product vision and implementation—contributing to{" "}
+                <HighlightedTextWithPreview>Chromium-based browsers</HighlightedTextWithPreview>
+                , engineering full-stack platforms, and integrating{" "}
+                <HighlightedTextWithPreview>AI capabilities for next-generation user experiences</HighlightedTextWithPreview>
+                . I thrive on tackling complex problems and delivering well-crafted solutions that scale.
+            </p>
+            <p>
+                I’m always exploring new technologies, mentoring teams, and advancing the craft of{" "}
+                <HighlightedTextWithPreview>developer experience and interaction design</HighlightedTextWithPreview>
+                . Let’s push boundaries and build incredible products.
+            </p>
         </div>
     )
 }
 
-function HighlightedTextWithPreview({ children, previewUrl, isFirst }: { children: ReactNode, previewUrl?: string, isFirst?: boolean }) {
+function HighlightedTextWithPreview({ children, isFirst }: { children: ReactNode, isFirst?: boolean }) {
     const { resolvedTheme } = useTheme();
 
     const { stopGame } = useGame();
@@ -270,10 +266,7 @@ function HighlightedTextWithPreview({ children, previewUrl, isFirst }: { childre
         collisionSides: { top: true },
         surface: GameSurface.CARPET,
         events: isFirst ? {
-            onPlayerEnter: (_payload) => {
-                console.log("player reached top");
-
-                // Fullscreen confetti shower!
+            onPlayerEnter: () => {
                 const duration = 3000;
                 const end = Date.now() + duration;
 
@@ -313,9 +306,7 @@ function HighlightedTextWithPreview({ children, previewUrl, isFirst }: { childre
                     frame();
                 });
             },
-            onPlayerLeave: (_payload) => {
-                console.log("player left top");
-                // Confetti automatically disappears, no cleanup needed
+            onPlayerLeave: () => {
                 toastManager.close("pinnacle-reached");
             },
         } : undefined,
@@ -333,19 +324,7 @@ function HighlightedTextWithPreview({ children, previewUrl, isFirst }: { childre
         transition: { type: "spring", duration: 0.8, delay: 0.1, bounce: 0 } satisfies Transition,
     } satisfies Omit<ComponentProps<typeof TextHighlighter>, "children">;
 
-    const highlighted = <TextHighlighter ref={attachHighlighterRef} {...highlighterProps}>{children}</TextHighlighter>;
-
-    // for now, we skip the tooltip for all text
-    if (!previewUrl || true) {
-        return highlighted;
-    }
-
-    return (
-        <Tooltip>
-            <TooltipTrigger>{highlighted}</TooltipTrigger>
-            <TooltipPopup className="rounded-md shadow-xl max-w-20 max-h-20 p-0" render={<img src={previewUrl} alt="Nature Pixel Art" />} />
-        </Tooltip>
-    )
+    return <TextHighlighter ref={attachHighlighterRef} {...highlighterProps}>{children}</TextHighlighter>;
 }
 
 function WorkExperience({ title, company, companyUrl, icon, startDate, endDate, className, ...props }: React.ComponentProps<typeof Card> & Work) {
@@ -458,14 +437,6 @@ function ProjectLinks({ github, website }: { github?: string; website?: string }
             )}
         </div>
     )
-}
-
-function formatDate(dateStr: string) {
-    if (dateStr === "Present") return "Present"
-    const date = new Date(dateStr)
-    const month = date.toLocaleString('default', { month: 'short' })
-    const year = date.getFullYear()
-    return `${month} ${year}`
 }
 
 function TechStackItem({ stack }: { stack: Stack }) {

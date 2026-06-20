@@ -1,11 +1,11 @@
 import { HyperText } from "@/components/ui/hyper-text";
-import { useStorage } from "@/hooks/use-storage";
+import { useFavoriteWallpaper } from "@/data/wallpapers";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 export function Header({ className, ...props }: React.ComponentProps<'header'>) {
-    const [savedWallpaper] = useStorage<string | null>('favorite-wallpaper', { defaultValue: null })
+    const [savedWallpaper] = useFavoriteWallpaper()
 
     const isWallpaperSaved = !!savedWallpaper;
 
