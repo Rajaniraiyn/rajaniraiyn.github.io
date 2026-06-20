@@ -16,6 +16,6 @@ bun run lint
 | install   | passes |
 | typecheck | passes |
 | build     | passes |
-| lint      | fails (19 errors, 5 warnings) |
+| lint      | fails (21 errors, 5 warnings) |
 
 Later stack layers should reduce the lint baseline and must not introduce new lint failures outside their scope.
