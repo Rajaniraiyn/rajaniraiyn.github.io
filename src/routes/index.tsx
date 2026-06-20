@@ -1,9 +1,7 @@
 import santaBrowserFaviconSrc from '@/assets/images/santabrowser-favicon.svg'
 import gameTowerPixelArtSrc from '@/assets/wallpapers/game-tower.jpeg'
 import naturePixelArtSrc from '@/assets/wallpapers/nature.jpeg'
-import { Game } from '@/components/cheats/game'
 import { TextHighlighter, type TextHighlighterRef } from "@/components/fancy/text/text-highlighter"
-import { GitHubContributions } from '@/components/github-contributions'
 import { DevToIcon, GithubIcon, InstagramIcon, LinkedinIcon, XIcon, YoutubeIcon } from '@/components/icons'
 import { Accordion, AccordionItem, AccordionPanel, AccordionTrigger } from '@/components/ui/accordion'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -20,12 +18,14 @@ import { useGameElement } from '@/hooks/use-game-element'
 import { GameElement, GameSurface } from '@/lib/mario-game'
 import { cn } from '@/lib/utils'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import confetti from "canvas-confetti"
 import { BuildingIcon, ExternalLink, GithubIcon as GithubIconLucide } from 'lucide-react'
 import type { Transition } from "motion"
 import type { ComponentProps, ReactNode } from 'react'
-import { Children, useCallback, useState } from 'react'
+import { Children, lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { z } from 'zod/mini'
+
+const LazyGame = lazy(() => import('@/components/cheats/game').then(module => ({ default: module.Game })))
+const LazyGitHubContributions = lazy(() => import('@/components/github-contributions').then(module => ({ default: module.GitHubContributions })))
 
 export const Route = createFileRoute('/')({
     validateSearch: (search) => z.object({
@@ -103,7 +103,11 @@ function RouteComponent() {
                 </Accordion>
             </section>
             <section className='space-y-4 px-2 max-w-screen md:max-w-3xl mx-auto overflow-x-scroll'>
-                <GitHubContributions />
+                <RenderWhenVisible placeholderHeight={150}>
+                    <Suspense fallback={<div className="h-[150px]" aria-hidden />}>
+                        <LazyGitHubContributions />
+                    </Suspense>
+                </RenderWhenVisible>
             </section>
             <section className='space-y-4 px-2'>
                 <h2 ref={techStackRef} className='text-2xl font-bold font-departure-mono uppercase w-fit'>Stack</h2>
@@ -167,7 +171,46 @@ function RouteComponent() {
                     <a className="hover:underline text-primary font-semibold" href="mailto:rajaniraiyn@gmail.com">rajaniraiyn@gmail.com</a>
                 </p>
             </section>
-            {isGameActive && <Game />}
+            {isGameActive && (
+                <Suspense fallback={null}>
+                    <LazyGame />
+                </Suspense>
+            )}
+        </div>
+    )
+}
+
+function RenderWhenVisible({
+    children,
+    placeholderHeight,
+}: {
+    children: ReactNode
+    placeholderHeight: number
+}) {
+    const containerRef = useRef<HTMLDivElement>(null)
+    const [isVisible, setIsVisible] = useState(false)
+
+    useEffect(() => {
+        const element = containerRef.current
+        if (!element) return
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setIsVisible(true)
+                    observer.disconnect()
+                }
+            },
+            { rootMargin: '200px' },
+        )
+
+        observer.observe(element)
+        return () => observer.disconnect()
+    }, [])
+
+    return (
+        <div ref={containerRef} style={{ minHeight: placeholderHeight }}>
+            {isVisible ? children : null}
         </div>
     )
 }
@@ -234,27 +277,6 @@ function HighlightedTextWithPreview({ children, previewUrl, isFirst }: { childre
                 const duration = 3000;
                 const end = Date.now() + duration;
 
-                const frame = () => {
-                    confetti({
-                        particleCount: 50,
-                        angle: 60,
-                        spread: 55,
-                        origin: { x: 0, y: 0.8 },
-                        colors: ['#FFD700', '#FFA500', '#FFFF00', '#FFFFFF', '#FF6B35']
-                    });
-
-                    confetti({
-                        particleCount: 50,
-                        angle: 120,
-                        spread: 55,
-                        origin: { x: 1, y: 0.8 },
-                        colors: ['#FFD700', '#FFA500', '#FFFF00', '#FFFFFF', '#FF6B35']
-                    });
-
-                    if (Date.now() < end) {
-                        requestAnimationFrame(frame);
-                    }
-                };
                 toastManager.add({
                     id: "pinnacle-reached",
                     type: "success",
@@ -265,7 +287,31 @@ function HighlightedTextWithPreview({ children, previewUrl, isFirst }: { childre
                     onRemove: handleStopGame,
                 })
 
-                frame();
+                void import('canvas-confetti').then(({ default: confetti }) => {
+                    const frame = () => {
+                        confetti({
+                            particleCount: 50,
+                            angle: 60,
+                            spread: 55,
+                            origin: { x: 0, y: 0.8 },
+                            colors: ['#FFD700', '#FFA500', '#FFFF00', '#FFFFFF', '#FF6B35']
+                        });
+
+                        confetti({
+                            particleCount: 50,
+                            angle: 120,
+                            spread: 55,
+                            origin: { x: 1, y: 0.8 },
+                            colors: ['#FFD700', '#FFA500', '#FFFF00', '#FFFFFF', '#FF6B35']
+                        });
+
+                        if (Date.now() < end) {
+                            requestAnimationFrame(frame);
+                        }
+                    };
+
+                    frame();
+                });
             },
             onPlayerLeave: (_payload) => {
                 console.log("player left top");
