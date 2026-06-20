@@ -86,6 +86,11 @@ const MAX_FRAME_STEP = 0.033; // seconds (30 FPS cap)
 const COLLISION_EPSILON = 1;
 const MIN_SUPPORT_OVERLAP = 4;
 const MIN_SIDE_OVERLAP = 4;
+const NEARBY_COLLISION_PADDING = 240;
+const CAMERA = {
+    DEAD_ZONE_X_RATIO: 0.3,
+    DEAD_ZONE_Y_RATIO: 0.3,
+};
 
 type PlayerState =
     | "STANDING"
@@ -201,6 +206,13 @@ type EmitSoundExtras = Partial<Omit<GameSoundPayload, "type" | "support" | "dt">
     support?: SupportInfo | null;
     dt?: number;
 };
+
+export interface VirtualControls {
+    left?: boolean;
+    right?: boolean;
+    walk?: boolean;
+    jump?: boolean;
+}
 
 interface ControlsState {
     left: boolean;
@@ -531,10 +543,11 @@ export class MarioGame {
         this.resolveVerticalMotion(dt, solids);
 
         const beforeClampX = this.x;
+        const vxBeforeClamp = this.vx;
         this.clampPositionToWorld();
         const hitBounds = beforeClampX !== this.x ? (this.x <= 0 ? "left" : "right") : null;
 
-        this.updateSoundState(prevGrounded, prevSupport, dt, vyBeforeResolve, horizontalCollision, hitBounds);
+        this.updateSoundState(prevGrounded, prevSupport, dt, vyBeforeResolve, horizontalCollision, hitBounds, vxBeforeClamp);
 
         // Update ground state events based on support changes
         this.updateGroundStateEvents(prevSupport);
@@ -740,13 +753,14 @@ export class MarioGame {
 
             if (landingSpot !== Number.POSITIVE_INFINITY) {
                 nextY = landingSpot;
+                const landingSpeed = Math.abs(this.vy);
                 this.vy = 0;
                 grounded = true;
                 this.currentSupport = landingSupport;
                 if (landingSupport) {
                     this.emitElementEvent('onPlayerCollide', (landingSupport as SupportInfo).entry.element, {
                         direction: "top",
-                        speed: Math.abs(this.vy),
+                        speed: landingSpeed,
                     });
                 }
             }
@@ -780,11 +794,12 @@ export class MarioGame {
 
             if (ceiling !== Number.NEGATIVE_INFINITY) {
                 nextY = ceiling;
+                const ceilingSpeed = Math.abs(this.vy);
                 this.vy = 0;
                 if (ceilingEntry) {
                     this.emitElementEvent('onPlayerCollide', ceilingEntry.element, {
                         direction: "bottom",
-                        speed: Math.abs(this.vy),
+                        speed: ceilingSpeed,
                     });
                 }
             }
@@ -817,6 +832,7 @@ export class MarioGame {
         vyBeforeResolve: number,
         horizontalCollision: HorizontalCollision | null,
         boundaryCollision: "left" | "right" | null,
+        boundarySpeed: number,
     ) {
         if (!this.hasSoundHandler) return;
 
@@ -837,7 +853,7 @@ export class MarioGame {
                 meta: { axis: "x", direction: horizontalCollision.direction },
             });
         } else if (boundaryCollision) {
-            const intensity = clamp(Math.abs(this.vx) / GAME.MAX_RUN_SPEED, 0.2, 1);
+            const intensity = clamp(Math.abs(boundarySpeed) / GAME.MAX_RUN_SPEED, 0.2, 1);
             this.emitSound(GameSoundEvent.COLLIDE, {
                 support: null,
                 intensity,
@@ -1023,19 +1039,99 @@ export class MarioGame {
 
     private clampPositionToWorld() {
         const maxX = Math.max(0, this.world.width - GAME.CHARACTER_WIDTH);
+        const prevX = this.x;
         this.x = clamp(this.x, 0, maxX);
+        if (this.x !== prevX) {
+            this.vx = 0;
+        }
         const groundY = this.world.groundTop - GAME.CHARACTER_HEIGHT;
         this.y = clamp(this.y, 0, Math.max(groundY, 0));
     }
 
     private getSolidElements() {
+        const playerBounds = {
+            x: this.x - NEARBY_COLLISION_PADDING,
+            y: this.y - NEARBY_COLLISION_PADDING,
+            width: GAME.CHARACTER_WIDTH + NEARBY_COLLISION_PADDING * 2,
+            height: GAME.CHARACTER_HEIGHT + NEARBY_COLLISION_PADDING * 2,
+        };
+
         const solids: RegisteredElement[] = [];
         for (const entry of this.elementRegistry.values()) {
-            if (entry.behavior.solid) {
+            if (!entry.behavior.solid) continue;
+            if (this.isEntryNearBounds(entry, playerBounds)) {
                 solids.push(entry);
             }
         }
         return solids;
+    }
+
+    private isEntryNearBounds(entry: RegisteredElement, bounds: GameRect) {
+        for (const segment of entry.segments) {
+            if (rectsOverlap(segment, bounds)) {
+                return true;
+            }
+        }
+        return rectsOverlap(entry.rect, bounds);
+    }
+
+    setVirtualControls(partialControls: VirtualControls) {
+        if (partialControls.left !== undefined) {
+            this.controls.left = partialControls.left;
+        }
+        if (partialControls.right !== undefined) {
+            this.controls.right = partialControls.right;
+        }
+        if (partialControls.walk !== undefined) {
+            this.controls.walk = partialControls.walk;
+        }
+        if (partialControls.jump !== undefined) {
+            if (partialControls.jump && !this.controls.jump) {
+                this.handleJumpQueueOnKeyDown();
+            } else if (!partialControls.jump) {
+                this.controls.jump = false;
+            }
+        }
+    }
+
+    private updateCamera() {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const scrollX = window.scrollX;
+        const scrollY = window.scrollY;
+
+        const playerCenterX = this.x + GAME.CHARACTER_WIDTH / 2;
+        const playerCenterY = this.y + GAME.CHARACTER_HEIGHT / 2;
+
+        const deadZoneLeft = scrollX + viewportWidth * CAMERA.DEAD_ZONE_X_RATIO;
+        const deadZoneRight = scrollX + viewportWidth * (1 - CAMERA.DEAD_ZONE_X_RATIO);
+        const deadZoneTop = scrollY + viewportHeight * CAMERA.DEAD_ZONE_Y_RATIO;
+        const deadZoneBottom = scrollY + viewportHeight * (1 - CAMERA.DEAD_ZONE_Y_RATIO);
+
+        let targetScrollX = scrollX;
+        let targetScrollY = scrollY;
+
+        if (playerCenterX < deadZoneLeft) {
+            targetScrollX = playerCenterX - viewportWidth * CAMERA.DEAD_ZONE_X_RATIO;
+        } else if (playerCenterX > deadZoneRight) {
+            targetScrollX = playerCenterX - viewportWidth * (1 - CAMERA.DEAD_ZONE_X_RATIO);
+        }
+
+        if (playerCenterY < deadZoneTop) {
+            targetScrollY = playerCenterY - viewportHeight * CAMERA.DEAD_ZONE_Y_RATIO;
+        } else if (playerCenterY > deadZoneBottom) {
+            targetScrollY = playerCenterY - viewportHeight * (1 - CAMERA.DEAD_ZONE_Y_RATIO);
+        }
+
+        const maxScrollX = Math.max(0, this.world.width - viewportWidth);
+        const maxScrollY = Math.max(0, this.world.height - viewportHeight);
+
+        targetScrollX = clamp(targetScrollX, 0, maxScrollX);
+        targetScrollY = clamp(targetScrollY, 0, maxScrollY);
+
+        if (targetScrollX !== scrollX || targetScrollY !== scrollY) {
+            window.scrollTo({ left: targetScrollX, top: targetScrollY, behavior: "auto" });
+        }
     }
 
     private getPlayerState(): PlayerState {
@@ -1057,7 +1153,7 @@ export class MarioGame {
 
     layOut() {
         this.playerEl.style.transform = `translate(${this.x}px, ${this.y}px)`;
-        this.playerEl.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'center' })
+        this.updateCamera();
 
         const playerState = this.getPlayerState();
         if (playerState !== this.lastState) {
@@ -1163,4 +1259,13 @@ function overlapAmount(aStart: number, aEnd: number, bStart: number, bEnd: numbe
     const start = Math.max(aStart, bStart);
     const end = Math.min(aEnd, bEnd);
     return Math.max(0, end - start);
+}
+
+function rectsOverlap(a: GameRect, b: GameRect) {
+    return (
+        a.x < b.x + b.width &&
+        a.x + a.width > b.x &&
+        a.y < b.y + b.height &&
+        a.y + a.height > b.y
+    );
 }

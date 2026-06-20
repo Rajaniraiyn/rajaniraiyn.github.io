@@ -1,5 +1,5 @@
 import type { GameElementRegistration, GameOptions, GameSoundHandler } from "@/lib/game-types";
-import type { MarioGame } from "@/lib/mario-game";
+import type { MarioGame, VirtualControls } from "@/lib/mario-game";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 
 // No-op sound handler for when sound is disabled
@@ -19,6 +19,7 @@ export interface GameContextType {
     stopGame: () => void;
     toggleSound: () => void;
     toggleMusic: () => void;
+    setControls: (partialControls: VirtualControls) => void;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -281,6 +282,10 @@ export function GameProvider({ children, options }: { children: React.ReactNode;
         });
     }, [isRunning, playBackgroundMusic]);
 
+    const setControls = useCallback((partialControls: VirtualControls) => {
+        gameRef.current?.setVirtualControls(partialControls);
+    }, []);
+
     useEffect(() => {
         return () => {
             invalidatePendingLoads();
@@ -300,7 +305,7 @@ export function GameProvider({ children, options }: { children: React.ReactNode;
     const updateOptions = applyOptions;
 
     return (
-        <GameContext.Provider value={{ isRunning, soundEnabled, musicEnabled, addPlayer, addElement, updateOptions, options: currentOptions, startGame, stopGame, toggleSound, toggleMusic }}>
+        <GameContext.Provider value={{ isRunning, soundEnabled, musicEnabled, addPlayer, addElement, updateOptions, options: currentOptions, startGame, stopGame, toggleSound, toggleMusic, setControls }}>
             {children}
         </GameContext.Provider>
     );

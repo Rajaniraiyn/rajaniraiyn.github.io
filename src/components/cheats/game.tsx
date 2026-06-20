@@ -5,13 +5,109 @@ import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Tooltip, TooltipPopup, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useGame } from "@/contexts/game";
 import { Man } from "@/lib/game-assets";
+import type { VirtualControls } from "@/lib/mario-game";
 import { useNavigate } from '@tanstack/react-router';
-import { Gamepad2, Loader2, Music, Play, Square, Volume2, VolumeX } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowUp, ChevronLeft, ChevronRight, Gamepad2, Loader2, Music, Play, Square, Volume2, VolumeX, Footprints } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+
+type ControlKey = keyof VirtualControls;
+
+function MobileGameControls({ setControls }: { setControls: (partialControls: VirtualControls) => void }) {
+    const activeControlsRef = useRef(new Map<number, ControlKey>());
+
+    const releaseControl = useCallback((control: ControlKey) => {
+        setControls({ [control]: false });
+    }, [setControls]);
+
+    const handlePointerDown = useCallback((control: ControlKey) => (event: ReactPointerEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        event.currentTarget.setPointerCapture(event.pointerId);
+        activeControlsRef.current.set(event.pointerId, control);
+        setControls({ [control]: true });
+    }, [setControls]);
+
+    const handlePointerUp = useCallback((event: ReactPointerEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        const control = activeControlsRef.current.get(event.pointerId);
+        if (control) {
+            releaseControl(control);
+            activeControlsRef.current.delete(event.pointerId);
+        }
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+            event.currentTarget.releasePointerCapture(event.pointerId);
+        }
+    }, [releaseControl]);
+
+    const handlePointerCancel = useCallback((event: ReactPointerEvent<HTMLButtonElement>) => {
+        const control = activeControlsRef.current.get(event.pointerId);
+        if (control) {
+            releaseControl(control);
+            activeControlsRef.current.delete(event.pointerId);
+        }
+    }, [releaseControl]);
+
+    const controlButtonClass =
+        "flex size-14 items-center justify-center rounded-full border border-border/60 bg-background/90 text-foreground shadow-lg backdrop-blur-sm select-none touch-none active:bg-accent active:scale-95 transition-transform";
+
+    return (
+        <div
+            className="fixed inset-x-0 bottom-0 z-50 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:hidden pointer-events-none"
+        >
+            <div className="mx-auto flex max-w-lg items-end justify-between gap-4 pointer-events-auto">
+                <div className="flex items-end gap-3">
+                    <button
+                        type="button"
+                        aria-label="Move left"
+                        className={controlButtonClass}
+                        style={{ touchAction: "none" }}
+                        onPointerDown={handlePointerDown("left")}
+                        onPointerUp={handlePointerUp}
+                        onPointerCancel={handlePointerCancel}
+                    >
+                        <ChevronLeft className="size-7" aria-hidden="true" />
+                    </button>
+                    <button
+                        type="button"
+                        aria-label="Move right"
+                        className={controlButtonClass}
+                        style={{ touchAction: "none" }}
+                        onPointerDown={handlePointerDown("right")}
+                        onPointerUp={handlePointerUp}
+                        onPointerCancel={handlePointerCancel}
+                    >
+                        <ChevronRight className="size-7" aria-hidden="true" />
+                    </button>
+                    <button
+                        type="button"
+                        aria-label="Walk slower"
+                        className={`${controlButtonClass} size-12`}
+                        style={{ touchAction: "none" }}
+                        onPointerDown={handlePointerDown("walk")}
+                        onPointerUp={handlePointerUp}
+                        onPointerCancel={handlePointerCancel}
+                    >
+                        <Footprints className="size-5" aria-hidden="true" />
+                    </button>
+                </div>
+                <button
+                    type="button"
+                    aria-label="Jump"
+                    className={`${controlButtonClass} size-16 bg-primary/90 text-primary-foreground border-primary/40`}
+                    style={{ touchAction: "none" }}
+                    onPointerDown={handlePointerDown("jump")}
+                    onPointerUp={handlePointerUp}
+                    onPointerCancel={handlePointerCancel}
+                >
+                    <ArrowUp className="size-8" aria-hidden="true" />
+                </button>
+            </div>
+        </div>
+    );
+}
 
 export function Game() {
     const characterRef = useRef<HTMLImageElement>(null);
-    const { addPlayer, isRunning, startGame, stopGame, soundEnabled, musicEnabled, toggleSound, toggleMusic } = useGame();
+    const { addPlayer, isRunning, startGame, stopGame, soundEnabled, musicEnabled, toggleSound, toggleMusic, setControls } = useGame();
     const navigate = useNavigate();
     const [isGameDialogOpen, setIsGameDialogOpen] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
@@ -165,6 +261,10 @@ export function Game() {
                                         <span className="text-muted-foreground text-sm">Walk (slower)</span>
                                         <Kbd className="bg-muted hover:bg-muted/80 transition-colors">Shift</Kbd>
                                     </div>
+                                    <div className="flex items-center justify-between py-2 md:hidden">
+                                        <span className="text-muted-foreground text-sm">Touch controls</span>
+                                        <span className="text-xs text-muted-foreground">On-screen buttons while playing</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -245,8 +345,8 @@ export function Game() {
                         </TooltipProvider>
                     </div>
 
-                    {/* Bottom Controls Hint */}
-                    <div className="fixed inset-x-0 bottom-0 z-50 p-3">
+                    {/* Bottom Controls Hint - desktop keyboard */}
+                    <div className="fixed inset-x-0 bottom-0 z-40 p-3 hidden md:block">
                         <div className="mx-auto max-w-4xl">
                             <Card className="bg-card/95 border-border/60 shadow-lg py-2 px-4">
                                 <div className="flex items-center justify-center gap-6 flex-wrap">
@@ -271,6 +371,8 @@ export function Game() {
                             </Card>
                         </div>
                     </div>
+
+                    <MobileGameControls setControls={setControls} />
                 </>
             )}
         </>
