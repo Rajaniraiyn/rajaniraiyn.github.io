@@ -1,17 +1,17 @@
-import backgroundMusicSrc from "@/assets/audio/8-bit-background.mp3";
-import { MarioGame, createGameSoundHandler, type GameElementRegistration, type GameOptions, type GameSoundHandler } from "@/lib/mario-game";
-import { createDefaultMarioSoundHandler } from "@/lib/mario-soundscape";
+import type { GameElementRegistration, GameOptions, GameSoundHandler } from "@/lib/game-types";
+import type { MarioGame } from "@/lib/mario-game";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 
 // No-op sound handler for when sound is disabled
 const NOOP_SOUND: GameSoundHandler = () => { };
 
+type CreateGameSoundHandler = typeof import("@/lib/mario-game").createGameSoundHandler;
+
 export interface GameContextType {
-    game: MarioGame | null;
     isRunning: boolean;
     soundEnabled: boolean;
     musicEnabled: boolean;
-    addPlayer: (playerEl: HTMLImageElement) => MarioGame;
+    addPlayer: (playerEl: HTMLImageElement) => Promise<MarioGame | null>;
     addElement: (dom: HTMLElement | SVGElement, config: GameElementRegistration) => (() => void) | null;
     updateOptions: (options: GameOptions) => void;
     options: GameOptions;
@@ -29,20 +29,53 @@ export function GameProvider({ children, options }: { children: React.ReactNode;
     const [soundEnabled, setSoundEnabled] = useState(true);
     const [musicEnabled, setMusicEnabled] = useState(true);
     const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
+    const pendingStartRef = useRef(false);
+    const loadGenerationRef = useRef(0);
     const registeredElements = useRef(
         new Map<HTMLElement | SVGElement, { options: GameElementRegistration; detach: (() => void) | null }>(),
     );
-    const defaultSoundHandlerRef = useRef(createDefaultMarioSoundHandler());
-    const optionsRef = useRef<GameOptions>(normalizeGameOptions(options ?? {}, defaultSoundHandlerRef.current));
-    const [currentOptions, setCurrentOptions] = useState<GameOptions>(optionsRef.current);
+    const defaultSoundHandlerRef = useRef<GameSoundHandler | null>(null);
+    const optionsRef = useRef<GameOptions>(options ?? {});
+    const [currentOptions, setCurrentOptions] = useState<GameOptions>(() => options ?? {});
+    const soundEnabledRef = useRef(soundEnabled);
+    const musicEnabledRef = useRef(musicEnabled);
 
-    const applyOptions = useCallback((next: GameOptions) => {
-        if (!next) return;
-        const normalized = normalizeGameOptions(next, soundEnabled ? defaultSoundHandlerRef.current : undefined);
-        optionsRef.current = { ...optionsRef.current, ...normalized };
-        setCurrentOptions(optionsRef.current);
-        gameRef.current?.updateOptions(optionsRef.current);
+    useEffect(() => {
+        soundEnabledRef.current = soundEnabled;
     }, [soundEnabled]);
+
+    useEffect(() => {
+        musicEnabledRef.current = musicEnabled;
+    }, [musicEnabled]);
+
+    const invalidatePendingLoads = useCallback(() => {
+        loadGenerationRef.current += 1;
+        pendingStartRef.current = false;
+    }, []);
+
+    const ensureBackgroundMusic = useCallback(async () => {
+        if (!backgroundMusicRef.current) {
+            const { default: backgroundMusicSrc } = await import("@/assets/audio/8-bit-background.mp3");
+            backgroundMusicRef.current = new Audio(backgroundMusicSrc);
+            backgroundMusicRef.current.loop = true;
+            backgroundMusicRef.current.volume = 0.3;
+        }
+
+        return backgroundMusicRef.current;
+    }, []);
+
+    const playBackgroundMusic = useCallback(async () => {
+        const audio = await ensureBackgroundMusic();
+        audio.play().catch(() => {
+            // Ignore play errors (user interaction required)
+        });
+    }, [ensureBackgroundMusic]);
+
+    const pauseBackgroundMusic = useCallback(() => {
+        if (!backgroundMusicRef.current) return;
+        backgroundMusicRef.current.pause();
+        backgroundMusicRef.current.currentTime = 0;
+    }, []);
 
     const attachRegisteredElements = useCallback(() => {
         const game = gameRef.current;
@@ -58,16 +91,63 @@ export function GameProvider({ children, options }: { children: React.ReactNode;
         }
     }, []);
 
-    const addPlayer = useCallback((playerEl: HTMLImageElement) => {
+    const startGameInternal = useCallback(async () => {
+        if (!gameRef.current) return;
+
+        gameRef.current.start();
+        setIsRunning(true);
+
+        if (musicEnabledRef.current) {
+            await playBackgroundMusic();
+        }
+    }, [playBackgroundMusic]);
+
+    const addPlayer = useCallback(async (playerEl: HTMLImageElement) => {
+        const generation = loadGenerationRef.current + 1;
+        loadGenerationRef.current = generation;
+
         gameRef.current?.dispose();
+        gameRef.current = null;
         setIsRunning(false);
 
+        const [{ MarioGame, createGameSoundHandler }, soundscapeModule] = await Promise.all([
+            import("@/lib/mario-game"),
+            soundEnabledRef.current ? import("@/lib/mario-soundscape") : Promise.resolve(null),
+        ]);
+
+        if (generation !== loadGenerationRef.current) {
+            return null;
+        }
+
+        if (soundEnabledRef.current && soundscapeModule && !defaultSoundHandlerRef.current) {
+            defaultSoundHandlerRef.current = soundscapeModule.createDefaultMarioSoundHandler();
+        }
+
+        const normalized = normalizeGameOptions(
+            optionsRef.current,
+            soundEnabledRef.current ? defaultSoundHandlerRef.current ?? undefined : undefined,
+            createGameSoundHandler,
+        );
+        optionsRef.current = normalized;
+        setCurrentOptions(normalized);
+
         const newGame = new MarioGame(playerEl, optionsRef.current);
+
+        if (generation !== loadGenerationRef.current) {
+            newGame.dispose();
+            return null;
+        }
+
         gameRef.current = newGame;
         attachRegisteredElements();
 
+        if (pendingStartRef.current && generation === loadGenerationRef.current) {
+            pendingStartRef.current = false;
+            await startGameInternal();
+        }
+
         return newGame;
-    }, [attachRegisteredElements]);
+    }, [attachRegisteredElements, startGameInternal]);
 
     const addElement = useCallback((dom: HTMLElement | SVGElement, config: GameElementRegistration) => {
         const normalizedConfig: GameElementRegistration = {
@@ -112,51 +192,77 @@ export function GameProvider({ children, options }: { children: React.ReactNode;
         return cleanup;
     }, []);
 
+    const applyOptions = useCallback(async (next: GameOptions) => {
+        if (!next) return;
+
+        const needsEngine = Boolean(next.soundMap && !next.onSound);
+        let createGameSoundHandler: CreateGameSoundHandler | undefined;
+
+        if (needsEngine) {
+            ({ createGameSoundHandler } = await import("@/lib/mario-game"));
+        }
+
+        const normalized = normalizeGameOptions(
+            next,
+            soundEnabled ? defaultSoundHandlerRef.current ?? undefined : undefined,
+            createGameSoundHandler,
+        );
+        optionsRef.current = { ...optionsRef.current, ...normalized };
+        setCurrentOptions(optionsRef.current);
+        gameRef.current?.updateOptions(optionsRef.current);
+    }, [soundEnabled]);
+
     useEffect(() => {
         if (options) {
-            applyOptions(options);
+            void applyOptions(options);
         }
     }, [options, applyOptions]);
 
     const startGame = useCallback(() => {
-        if (!gameRef.current) return;
-        gameRef.current.start();
-        setIsRunning(true);
-
-        // Start background music if enabled
-        if (musicEnabled && backgroundMusicRef.current) {
-            backgroundMusicRef.current.play().catch(() => {
-                // Ignore play errors (user interaction required)
-            });
+        if (!gameRef.current) {
+            pendingStartRef.current = true;
+            return;
         }
-    }, [musicEnabled]);
+
+        void startGameInternal();
+    }, [startGameInternal]);
 
     const stopGame = useCallback(() => {
+        invalidatePendingLoads();
+
         if (gameRef.current) {
             gameRef.current.dispose();
             gameRef.current = null;
         }
         setIsRunning(false);
-
-        // Stop background music
-        if (backgroundMusicRef.current) {
-            backgroundMusicRef.current.pause();
-            backgroundMusicRef.current.currentTime = 0;
-        }
-    }, []);
+        pauseBackgroundMusic();
+    }, [invalidatePendingLoads, pauseBackgroundMusic]);
 
     const toggleSound = useCallback(() => {
         setSoundEnabled(prev => {
             const newValue = !prev;
-            // Update game options if game is running
+
             if (gameRef.current) {
-                const newOptions = {
-                    ...optionsRef.current,
-                    onSound: newValue ? defaultSoundHandlerRef.current : NOOP_SOUND
-                };
-                optionsRef.current = newOptions;
-                gameRef.current.updateOptions(newOptions);
+                void (async () => {
+                    let handler: GameSoundHandler = NOOP_SOUND;
+
+                    if (newValue) {
+                        if (!defaultSoundHandlerRef.current) {
+                            const { createDefaultMarioSoundHandler } = await import("@/lib/mario-soundscape");
+                            defaultSoundHandlerRef.current = createDefaultMarioSoundHandler();
+                        }
+                        handler = defaultSoundHandlerRef.current;
+                    }
+
+                    const newOptions = {
+                        ...optionsRef.current,
+                        onSound: newValue ? handler : NOOP_SOUND,
+                    };
+                    optionsRef.current = newOptions;
+                    gameRef.current?.updateOptions(newOptions);
+                })();
             }
+
             return newValue;
         });
     }, []);
@@ -164,41 +270,37 @@ export function GameProvider({ children, options }: { children: React.ReactNode;
     const toggleMusic = useCallback(() => {
         setMusicEnabled(prev => {
             const newValue = !prev;
-            // Control background music
-            if (backgroundMusicRef.current) {
-                if (newValue && isRunning) {
-                    backgroundMusicRef.current.play().catch(() => {
-                        // Ignore play errors (user interaction required)
-                    });
-                } else {
-                    backgroundMusicRef.current.pause();
-                }
+
+            if (newValue && isRunning) {
+                void playBackgroundMusic();
+            } else if (!newValue && backgroundMusicRef.current) {
+                backgroundMusicRef.current.pause();
             }
+
             return newValue;
         });
-    }, [isRunning]);
+    }, [isRunning, playBackgroundMusic]);
 
-    // Initialize background music
     useEffect(() => {
-        if (!backgroundMusicRef.current) {
-            backgroundMusicRef.current = new Audio(backgroundMusicSrc);
-            backgroundMusicRef.current.loop = true;
-            backgroundMusicRef.current.volume = 0.3; // Low volume for background
-        }
-
         return () => {
+            invalidatePendingLoads();
+
+            if (gameRef.current) {
+                gameRef.current.dispose();
+                gameRef.current = null;
+            }
+
             if (backgroundMusicRef.current) {
                 backgroundMusicRef.current.pause();
                 backgroundMusicRef.current = null;
             }
         };
-    }, []);
+    }, [invalidatePendingLoads]);
 
     const updateOptions = applyOptions;
-    const game = gameRef.current;
 
     return (
-        <GameContext.Provider value={{ game, isRunning, soundEnabled, musicEnabled, addPlayer, addElement, updateOptions, options: currentOptions, startGame, stopGame, toggleSound, toggleMusic }}>
+        <GameContext.Provider value={{ isRunning, soundEnabled, musicEnabled, addPlayer, addElement, updateOptions, options: currentOptions, startGame, stopGame, toggleSound, toggleMusic }}>
             {children}
         </GameContext.Provider>
     );
@@ -212,10 +314,14 @@ export function useGame() {
     return context;
 }
 
-function normalizeGameOptions(options: GameOptions, defaultHandler?: GameSoundHandler): GameOptions {
+function normalizeGameOptions(
+    options: GameOptions,
+    defaultHandler?: GameSoundHandler,
+    createGameSoundHandler?: CreateGameSoundHandler,
+): GameOptions {
     const normalized: GameOptions = { ...options };
 
-    if (normalized.soundMap && !normalized.onSound) {
+    if (normalized.soundMap && !normalized.onSound && createGameSoundHandler) {
         normalized.onSound = createGameSoundHandler(normalized.soundMap);
     }
 

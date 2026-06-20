@@ -12,7 +12,7 @@ import { projects, type Project, type Project as ProjectItem } from "@/data/proj
 import { stack, type Stack } from "@/data/stack"
 import { works, type Work } from "@/data/works"
 import { useGameElement } from '@/hooks/use-game-element'
-import { GameElement, GameSurface } from '@/lib/mario-game'
+import { GameElement, GameSurface } from '@/lib/game-types'
 import { formatDate } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import { createFileRoute, Link } from '@tanstack/react-router'

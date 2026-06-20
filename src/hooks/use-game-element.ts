@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react"
 import type { DependencyList } from "react"
 
 import { useGame } from "@/contexts/game"
-import type { GameElementRegistration } from "@/lib/mario-game"
+import type { GameElementRegistration } from "@/lib/game-types"
 
 function normalizeConfig(config: Omit<GameElementRegistration, 'events'>): Omit<GameElementRegistration, 'events'> {
     return {

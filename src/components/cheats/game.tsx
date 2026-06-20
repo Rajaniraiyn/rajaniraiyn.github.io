@@ -4,7 +4,7 @@ import { Dialog, DialogDescription, DialogFooter, DialogHeader, DialogPopup, Dia
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Tooltip, TooltipPopup, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useGame } from "@/contexts/game";
-import { Man } from "@/lib/mario-game";
+import { Man } from "@/lib/game-assets";
 import { useNavigate } from '@tanstack/react-router';
 import { Gamepad2, Loader2, Music, Play, Square, Volume2, VolumeX } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -75,9 +75,11 @@ export function Game() {
     useEffect(() => {
         if (!characterRef.current) return;
 
-        const game = addPlayer(characterRef.current);
-        return () => game?.dispose();
-    }, [addPlayer]);
+        void addPlayer(characterRef.current);
+        return () => {
+            stopGame();
+        };
+    }, [addPlayer, stopGame]);
 
     return (
         <>
