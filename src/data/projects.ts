@@ -10,6 +10,20 @@ export type Project = {
 
 export const projects: Project[] = [
     {
+        name: "jzon-rs",
+        github: "https://github.com/Rajaniraiyn/jzon-rs",
+        website: "",
+        startDate: "2026-06-01",
+        endDate: "Present",
+        description: "Zero-copy JSON serialization with compile-time generated typed parsers.",
+        details: [
+            "Rust-first JSON toolkit focused on zero-copy data handling.",
+            "Generates typed parsers at compile time for predictable, structured JSON access.",
+            "Designed for performance-sensitive serialization workflows.",
+            "113+ stars on GitHub.",
+        ]
+    },
+    {
         name: "React Alien Signals",
         github: "https://github.com/Rajaniraiyn/react-alien-signals",
         website: "",
@@ -80,6 +94,20 @@ export const projects: Project[] = [
         ]
     },
     {
+        name: "CefSwift",
+        github: "https://github.com/Rajaniraiyn/CefSwift",
+        website: "",
+        startDate: "2026-06-01",
+        endDate: "Present",
+        description: "Chromium Embedded Framework (CEF) for SwiftUI on macOS.",
+        details: [
+            "Brings CEF integration to SwiftUI-based macOS applications.",
+            "Supports Alloy NSView, Chrome runtime window, and OSR/Metal IOSurface hosting modes.",
+            "Automates CEF download and bundling through a SwiftPM plugin.",
+            "5+ stars on GitHub.",
+        ]
+    },
+    {
         name: "UPM",
         github: "https://github.com/Rajaniraiyn/upm",
         website: "",
@@ -103,6 +131,20 @@ export const projects: Project[] = [
             "Developed a lightweight and performant audio interaction library for Svelte.",
             "Implemented dynamic imports to support partial hydration.",
             "Created a scalable solution for complex game interactions.",
+        ]
+    },
+    {
+        name: "unffi",
+        github: "https://github.com/Rajaniraiyn/unffi",
+        website: "",
+        startDate: "2026-06-01",
+        endDate: "Present",
+        description: "Universal FFI layer for using native libraries.",
+        details: [
+            "Provides a common layer for working with native libraries through FFI.",
+            "Explores a TypeScript-friendly interface for native library integration.",
+            "Aims to simplify cross-runtime access to platform-native capabilities.",
+            "Early-stage open-source project on GitHub.",
         ]
     },
     {
