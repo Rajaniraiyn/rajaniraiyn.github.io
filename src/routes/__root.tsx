@@ -1,4 +1,4 @@
-import { useStorage } from '@/hooks/use-storage'
+import { useFavoriteWallpaper } from '@/data/wallpapers'
 import { createRootRoute, Outlet } from '@tanstack/react-router'
 import { lazy, Suspense } from 'react'
 
@@ -11,7 +11,7 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
-  const [savedWallpaper] = useStorage<string | null>('favorite-wallpaper', { defaultValue: null })
+  const [savedWallpaper] = useFavoriteWallpaper()
 
   return (
     <div className='flex flex-row min-h-screen gap-1'>

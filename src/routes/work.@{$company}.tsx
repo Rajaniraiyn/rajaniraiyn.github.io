@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { COMPANIES, works } from '@/data/works'
+import { formatDate } from '@/lib/date'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { BuildingIcon, CalendarIcon, ExternalLink } from 'lucide-react'
 import { z } from 'zod/mini'
@@ -18,14 +19,6 @@ export const Route = createFileRoute('/work/@{$company}')({
 
 function RouteComponent() {
     const work = Route.useLoaderData()
-
-    const formatDate = (dateStr: string) => {
-        if (dateStr === "Present") return "Present"
-        const date = new Date(dateStr)
-        const month = date.toLocaleString('default', { month: 'short' })
-        const year = date.getFullYear()
-        return `${month} ${year}`
-    }
 
     return (
         <div className='space-y-8 scroll-pt-1 px-2'>
