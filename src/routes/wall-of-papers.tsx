@@ -103,6 +103,8 @@ function RouteComponent() {
                                     style={{ imageRendering: 'pixelated' }}
                                     src={src}
                                     alt={`Wallpaper ${index + 1}`}
+                                    loading="lazy"
+                                    decoding="async"
                                 />
                                 <div className='absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 rounded-lg' />
                                 <div className='absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
@@ -131,6 +133,7 @@ function RouteComponent() {
                             alt={`Wallpaper ${selected + 1}`}
                             className='max-w-full max-h-full object-contain rounded-lg shadow-2xl'
                             style={{ imageRendering: 'pixelated' }}
+                            decoding="async"
                         />
 
                         {/* Close button */}

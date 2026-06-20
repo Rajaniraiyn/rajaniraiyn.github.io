@@ -35,6 +35,7 @@ function RootComponent() {
         alt="Saved Wallpaper"
         className="absolute inset-0 size-full -z-10 object-cover opacity-25"
         style={{ imageRendering: 'pixelated' }}
+        decoding="async"
       />}
     </div>
   )
