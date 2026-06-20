@@ -1,10 +1,10 @@
 import {
-    createGameSoundHandler,
     GameSoundEvent,
     GameSurface,
     type GameSoundHandler,
     type GameSoundMap,
-} from "@/lib/mario-game";
+} from "@/lib/game-types";
+import { createGameSoundHandler } from "@/lib/mario-game";
 
 import footstepCarpet000Url from "../assets/audio/footstep_carpet_000.ogg?url";
 import footstepCarpet001Url from "../assets/audio/footstep_carpet_001.ogg?url";

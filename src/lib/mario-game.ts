@@ -1,53 +1,47 @@
-import manCartwheelingMediumDarkSrc from "@/assets/animated/man_cartwheeling_medium-dark.png"
-import manDancingMediumDarkSrc from "@/assets/animated/man_dancing_medium-dark.png"
-import manRunningFacingRightMediumDarkSrc from "@/assets/animated/man_running_facing_right_medium-dark.png"
-import manRunningMediumDarkSrc from "@/assets/animated/man_running_medium-dark.png"
-import manStandingMediumDarkSrc from "@/assets/animated/man_standing_medium-dark.png"
-import manWalkingFacingRightMediumDarkSrc from "@/assets/animated/man_walking_facing_right_medium-dark.png"
-import manWalkingMediumDarkSrc from "@/assets/animated/man_walking_medium-dark.png"
+import { Man } from "@/lib/game-assets"
+import {
+    COLLISION,
+    GameElement,
+    GameSoundEvent,
+    GameSurface,
+    type CollisionMask,
+    type CollisionSides,
+    type GameElementEventPayload,
+    type GameElementEvents,
+    type GameElementRegistration,
+    type GameOptions,
+    type GameRect,
+    type GameSoundDefinition,
+    type GameSoundHandler,
+    type GameSoundMap,
+    type GameSoundPayload,
+    type GameSoundSpec,
+    type GameSoundSupport,
+    type PassThroughConfig,
+} from "@/lib/game-types"
 import { cancelFrame, frame, type FrameData } from "motion"
 
-export const Man = {
-    CARTWHEELING: manCartwheelingMediumDarkSrc,
-    DANCING: manDancingMediumDarkSrc,
-    RUNNING_RIGHT: manRunningFacingRightMediumDarkSrc,
-    RUNNING_LEFT: manRunningMediumDarkSrc,
-    STANDING: manStandingMediumDarkSrc,
-    WALKING_RIGHT: manWalkingFacingRightMediumDarkSrc,
-    WALKING_LEFT: manWalkingMediumDarkSrc,
-} as const;
-
-export enum GameElement {
-    PLATFORM = "platform",
-}
-
-export const COLLISION = {
-    NONE: 0,
-    TOP: 1 << 0,
-    BOTTOM: 1 << 1,
-    LEFT: 1 << 2,
-    RIGHT: 1 << 3,
-    VERTICAL: (1 << 0) | (1 << 1),
-    HORIZONTAL: (1 << 2) | (1 << 3),
-    ALL: (1 << 0) | (1 << 1) | (1 << 2) | (1 << 3),
-} as const;
-
-export type CollisionMask =
-    (typeof COLLISION)[keyof typeof COLLISION];
-
-export type CollisionSides = Partial<{
-    top: boolean;
-    bottom: boolean;
-    left: boolean;
-    right: boolean;
-}>;
-
-export interface PassThroughConfig {
-    upward?: boolean;
-    downward?: boolean;
-    leftward?: boolean;
-    rightward?: boolean;
-}
+export {
+    COLLISION,
+    GameElement,
+    GameSoundEvent,
+    GameSurface,
+    type CollisionMask,
+    type CollisionSides,
+    type GameElementEventPayload,
+    type GameElementEventHandler,
+    type GameElementEvents,
+    type GameElementRegistration,
+    type GameOptions,
+    type GameRect,
+    type GameSoundDefinition,
+    type GameSoundHandler,
+    type GameSoundMap,
+    type GameSoundPayload,
+    type GameSoundSpec,
+    type GameSoundSupport,
+    type PassThroughConfig,
+} from "@/lib/game-types"
 
 interface GameElementBehavior {
     solid: boolean;
@@ -102,99 +96,6 @@ type PlayerState =
     | "JUMPING_LEFT"
     | "JUMPING_RIGHT"
     | "JUMPING";
-
-export interface GameRect {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-}
-
-export enum GameSoundEvent {
-    LAND = "land",
-    JUMP = "jump",
-    FALL = "fall",
-    FOOTSTEP = "footstep",
-    COLLIDE = "collide",
-}
-
-export enum GameSurface {
-    DEFAULT = "default",
-    WOOD = "wood",
-    METAL = "metal",
-    GLASS = "glass",
-    CARPET = "carpet",
-    CONCRETE = "concrete",
-    GRASS = "grass",
-    SNOW = "snow",
-    BELL = "bell",
-    PLATE = "plate",
-}
-
-export interface GameSoundSupport {
-    element: HTMLElement | SVGElement;
-    type: GameElement;
-    rect: GameRect;
-    surface: GameSurface;
-}
-
-export interface GameSoundPayload {
-    type: GameSoundEvent;
-    dt: number;
-    position: { x: number; y: number };
-    velocity: { x: number; y: number };
-    intensity?: number;
-    support: GameSoundSupport | null;
-    meta?: Record<string, unknown>;
-}
-
-export type GameSoundHandler = (event: GameSoundEvent, payload: GameSoundPayload) => void;
-
-export interface GameSoundSpec {
-    src: string;
-    volume?: number;
-    playbackRate?: number;
-}
-
-export type GameSoundDefinition =
-    | string
-    | HTMLAudioElement
-    | GameSoundSpec
-    | ((event: GameSoundEvent, payload: GameSoundPayload) => void);
-
-export type GameSoundMap = Partial<Record<GameSoundEvent, GameSoundDefinition>>;
-
-export interface GameOptions {
-    footstepInterval?: number;
-    onSound?: GameSoundHandler;
-    soundMap?: GameSoundMap;
-}
-
-export type GameElementEventPayload = {
-    element: HTMLElement | SVGElement;
-    direction?: "left" | "right" | "top" | "bottom";
-    speed?: number;
-    metadata?: Record<string, unknown>;
-};
-
-export type GameElementEventHandler = (payload: GameElementEventPayload) => void;
-
-export type GameElementEvents = {
-    onPlayerEnter?: GameElementEventHandler;
-    onPlayerLeave?: GameElementEventHandler;
-    onPlayerCollide?: GameElementEventHandler;
-};
-
-export type GameElementRegistration = {
-    type: GameElement;
-    collisionSides?: CollisionSides;
-    collisionMask?: CollisionMask;
-    passThrough?: PassThroughConfig;
-    solid?: boolean;
-    metadata?: Record<string, unknown>;
-    surface?: GameSurface;
-    events?: GameElementEvents;
-};
 
 const DEFAULT_FOOTSTEP_INTERVAL = 0.32;
 const NOOP_SOUND: GameSoundHandler = () => { };
@@ -326,6 +227,7 @@ const MOVEMENT_KEYS = new Set([
 ]);
 
 export class MarioGame {
+    private isLoopRunning = false;
     private vx = 0; // horizontal velocity (px/sec)
     private vy = 0; // vertical velocity (px/sec)
     private x = 80; // horizontal position (px)
@@ -393,8 +295,14 @@ export class MarioGame {
     }
 
     start() {
+        if (this.isLoopRunning) return;
+
+        this.isLoopRunning = true;
         const process = frame.preRender(this.tick, true);
-        this.disposables.add(() => cancelFrame(process));
+        this.disposables.add(() => {
+            cancelFrame(process);
+            this.isLoopRunning = false;
+        });
     }
 
     addElement(dom: HTMLElement | SVGElement, options: GameElementRegistration) {

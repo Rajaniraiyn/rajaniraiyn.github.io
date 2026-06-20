@@ -1,8 +1,7 @@
 import { useTheme } from "@/contexts/theme";
 import GitHubCalendar from "react-github-calendar";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "./ui/tooltip";
-import { GameSurface } from "@/lib/mario-game";
-import { GameElement } from "@/lib/mario-game";
+import { GameElement, GameSurface } from "@/lib/game-types";
 import { useGameElement } from "@/hooks/use-game-element";
 
 type Activity = {
