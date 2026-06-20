@@ -4,10 +4,9 @@ import { Accordion, AccordionItem, AccordionPanel, AccordionTrigger } from '@/co
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress, ProgressIndicator, ProgressTrack } from "@/components/ui/progress"
-import { toastManager } from '@/components/ui/toast'
 import { Tooltip, TooltipPopup, TooltipTrigger } from '@/components/ui/tooltip'
-import { useGame } from '@/contexts/game'
 import { useTheme } from '@/contexts/theme'
+import { dispatchSummitLeave, dispatchSummitReached, hasCompletedGameProgress, useGameProgress } from '@/data/game-progress'
 import { projects, type Project, type Project as ProjectItem } from "@/data/projects"
 import { stack, type Stack } from "@/data/stack"
 import { works, type Work } from "@/data/works"
@@ -252,14 +251,7 @@ function About() {
 
 function HighlightedTextWithPreview({ children, isFirst }: { children: ReactNode, isFirst?: boolean }) {
     const { resolvedTheme } = useTheme();
-
-    const { stopGame } = useGame();
-    const navigate = Route.useNavigate();
-
-    const handleStopGame = useCallback(() => {
-        stopGame();
-        navigate({ to: '/', search: {}, replace: true, resetScroll: false });
-    }, [stopGame, navigate]);
+    const [hasCompletedGame, setHasCompletedGame] = useGameProgress();
 
     const registerPlatform = useGameElement<HTMLElement>({
         type: GameElement.PLATFORM,
@@ -267,47 +259,13 @@ function HighlightedTextWithPreview({ children, isFirst }: { children: ReactNode
         surface: GameSurface.CARPET,
         events: isFirst ? {
             onPlayerEnter: () => {
-                const duration = 3000;
-                const end = Date.now() + duration;
+                if (hasCompletedGame || hasCompletedGameProgress()) return;
 
-                toastManager.add({
-                    id: "pinnacle-reached",
-                    type: "success",
-                    title: "You reached the pinnacle!",
-                    description: "Hope you enjoyed the journey!",
-                    priority: "high",
-                    timeout: duration + 1000,
-                    onRemove: handleStopGame,
-                })
-
-                void import('canvas-confetti').then(({ default: confetti }) => {
-                    const frame = () => {
-                        confetti({
-                            particleCount: 50,
-                            angle: 60,
-                            spread: 55,
-                            origin: { x: 0, y: 0.8 },
-                            colors: ['#FFD700', '#FFA500', '#FFFF00', '#FFFFFF', '#FF6B35']
-                        });
-
-                        confetti({
-                            particleCount: 50,
-                            angle: 120,
-                            spread: 55,
-                            origin: { x: 1, y: 0.8 },
-                            colors: ['#FFD700', '#FFA500', '#FFFF00', '#FFFFFF', '#FF6B35']
-                        });
-
-                        if (Date.now() < end) {
-                            requestAnimationFrame(frame);
-                        }
-                    };
-
-                    frame();
-                });
+                setHasCompletedGame(true);
+                dispatchSummitReached();
             },
             onPlayerLeave: () => {
-                toastManager.close("pinnacle-reached");
+                dispatchSummitLeave();
             },
         } : undefined,
     })
