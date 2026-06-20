@@ -3,6 +3,7 @@ import * as m from "motion/react-m"
 import {
   useDeferredValue,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   useInsertionEffect,
@@ -38,6 +39,14 @@ const DEFAULT_CHARACTER_SET = Object.freeze(
 
 const getRandomInt = (max: number): number => Math.floor(Math.random() * max)
 
+const MotionDiv = m.create("div", {
+  forwardMotionProps: true,
+})
+
+const MotionH3 = m.create("h3", {
+  forwardMotionProps: true,
+})
+
 export function HyperText<T extends React.ElementType = "div">({
   children,
   className,
@@ -49,22 +58,25 @@ export function HyperText<T extends React.ElementType = "div">({
   characterSet = DEFAULT_CHARACTER_SET,
   ...props
 }: HyperTextProps<T>) {
-  const MotionComponent = m.create(Component, {
-    forwardMotionProps: true,
-  })
-
   const deferredChildren = useDeferredValue(children)
-
-  const [displayText, setDisplayText] = useState<string[]>(() =>
-    deferredChildren.split("")
+  const lettersFromChildren = useMemo(
+    () => deferredChildren.split(""),
+    [deferredChildren],
   )
+
+  const [scrambleText, setScrambleText] = useState<string[] | null>(null)
   const [isAnimating, setIsAnimating] = useState(false)
   const iterationCount = useRef(0)
-  const elementRef = useRef<HTMLElement>(null)
+  const elementRef = useRef<HTMLDivElement | HTMLHeadingElement>(null)
+
+  const displayText = isAnimating && scrambleText !== null
+    ? scrambleText
+    : lettersFromChildren
 
   const handleAnimationTrigger = () => {
     if (animateOnHover && !isAnimating) {
       iterationCount.current = 0
+      setScrambleText(lettersFromChildren)
       setIsAnimating(true)
     }
   }
@@ -76,16 +88,14 @@ export function HyperText<T extends React.ElementType = "div">({
     const startTime = performance.now()
     let animationFrameId: number
 
-    // Use local array to avoid state batching issues.
     const animate = (currentTime: number) => {
       const elapsed = currentTime - startTime
       const progress = Math.min(elapsed / duration, 1)
       const itCount = Math.floor(progress * maxIterations)
       iterationCount.current = itCount
 
-      // Use direct calculation for optimal update.
-      setDisplayText((currentText) =>
-        currentText.map((_, index) =>
+      setScrambleText((currentText) =>
+        (currentText ?? lettersFromChildren).map((_, index) =>
           deferredChildren[index] === " "
             ? " "
             : index <= itCount
@@ -98,12 +108,13 @@ export function HyperText<T extends React.ElementType = "div">({
         animationFrameId = requestAnimationFrame(animate)
       } else {
         setIsAnimating(false)
+        setScrambleText(null)
       }
     }
 
     animationFrameId = requestAnimationFrame(animate)
     return () => cancelAnimationFrame(animationFrameId)
-  }, [deferredChildren, duration, isAnimating, characterSet])
+  }, [deferredChildren, duration, isAnimating, characterSet, lettersFromChildren])
 
   useInsertionEffect(() => {
     if (!startOnView || !elementRef.current) return
@@ -113,7 +124,10 @@ export function HyperText<T extends React.ElementType = "div">({
       ([entry]) => {
         if (entry.isIntersecting && !started) {
           started = true
-          setTimeout(() => setIsAnimating(true), delay)
+          setTimeout(() => {
+            setScrambleText(deferredChildren.split(""))
+            setIsAnimating(true)
+          }, delay)
           observer.disconnect()
         }
       },
@@ -121,31 +135,29 @@ export function HyperText<T extends React.ElementType = "div">({
     )
     observer.observe(elementRef.current)
     return () => observer.disconnect()
-  }, [delay, startOnView])
+  }, [delay, startOnView, deferredChildren])
 
   useLayoutEffect(() => {
     if (!startOnView) {
       const startTimeout = setTimeout(() => {
+        setScrambleText(deferredChildren.split(""))
         setIsAnimating(true)
       }, delay)
       return () => clearTimeout(startTimeout)
     }
-  }, [delay, startOnView])
-
-  useLayoutEffect(() => {
-    setDisplayText(deferredChildren.split(""))
-  }, [deferredChildren])
+  }, [delay, startOnView, deferredChildren])
 
   const srId = useId()
 
-  return (
-    <MotionComponent
-      ref={elementRef}
-      aria-labelledby={srId}
-      className={cn("overflow-hidden py-2 text-4xl font-bold", className)}
-      onMouseEnter={handleAnimationTrigger}
-      {...props}
-    >
+  const motionProps = {
+    "aria-labelledby": srId,
+    className: cn("overflow-hidden py-2 text-4xl font-bold", className),
+    onMouseEnter: handleAnimationTrigger,
+    ...props,
+  }
+
+  const content = (
+    <>
       <AnimatePresence>
         {displayText.map((letter, index) => (
           <m.span
@@ -157,6 +169,20 @@ export function HyperText<T extends React.ElementType = "div">({
         ))}
       </AnimatePresence>
       <span id={srId} className="sr-only">{deferredChildren}</span>
-    </MotionComponent>
+    </>
+  )
+
+  if (Component === "h3") {
+    return (
+      <MotionH3 ref={elementRef} {...motionProps}>
+        {content}
+      </MotionH3>
+    )
+  }
+
+  return (
+    <MotionDiv ref={elementRef} {...motionProps}>
+      {content}
+    </MotionDiv>
   )
 }

@@ -1,4 +1,4 @@
-import { useTheme } from "@/contexts/theme";
+import { useTheme } from "@/contexts/use-theme";
 import GitHubCalendar from "react-github-calendar";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "./ui/tooltip";
 import { GameElement, GameSurface } from "@/lib/game-types";
@@ -18,13 +18,15 @@ export function GitHubContributions() {
             colorScheme={resolvedTheme}
             showWeekdayLabels
             weekStart={1}
-            renderBlock={renderBlock}
+            renderBlock={(block, activity) => (
+                <ContributionBlock block={block} activity={activity} />
+            )}
             renderColorLegend={renderColorLegend}
         />
     )
 }
 
-function renderBlock(block: React.ReactNode, activity: Activity) {
+function ContributionBlock({ block, activity }: { block: React.ReactNode; activity: Activity }) {
     const platformRef = useGameElement<SVGSVGElement>({
         type: GameElement.PLATFORM,
         surface: GameSurface.WOOD,

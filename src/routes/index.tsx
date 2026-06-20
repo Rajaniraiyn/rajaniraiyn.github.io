@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress, ProgressIndicator, ProgressTrack } from "@/components/ui/progress"
 import { Tooltip, TooltipPopup, TooltipTrigger } from '@/components/ui/tooltip'
-import { useTheme } from '@/contexts/theme'
+import { useTheme } from "@/contexts/use-theme"
 import { dispatchSummitLeave, dispatchSummitReached, hasCompletedGameProgress, useGameProgress } from '@/data/game-progress'
 import { projects, type Project, type Project as ProjectItem } from "@/data/projects"
 import { stack, type Stack } from "@/data/stack"

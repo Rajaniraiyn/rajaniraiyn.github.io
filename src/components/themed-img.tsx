@@ -1,4 +1,4 @@
-import { useTheme } from "@/contexts/theme"
+import { useTheme } from "@/contexts/use-theme"
 
 interface ThemedImgProps extends Omit<React.ComponentProps<"img">, "src"> {
     src: {

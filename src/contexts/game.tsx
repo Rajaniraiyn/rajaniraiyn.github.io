@@ -1,28 +1,13 @@
-import type { GameElementRegistration, GameOptions, GameSoundHandler } from "@/lib/game-types";
+import type { GameSoundHandler } from "@/lib/game-types";
+import type { GameElementRegistration, GameOptions } from "@/lib/game-types";
 import type { MarioGame, VirtualControls } from "@/lib/mario-game";
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { GameContext, type GameContextType } from "@/contexts/use-game";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 // No-op sound handler for when sound is disabled
 const NOOP_SOUND: GameSoundHandler = () => { };
 
 type CreateGameSoundHandler = typeof import("@/lib/mario-game").createGameSoundHandler;
-
-export interface GameContextType {
-    isRunning: boolean;
-    soundEnabled: boolean;
-    musicEnabled: boolean;
-    addPlayer: (playerEl: HTMLImageElement) => Promise<MarioGame | null>;
-    addElement: (dom: HTMLElement | SVGElement, config: GameElementRegistration) => (() => void) | null;
-    updateOptions: (options: GameOptions) => void;
-    options: GameOptions;
-    startGame: () => void;
-    stopGame: () => void;
-    toggleSound: () => void;
-    toggleMusic: () => void;
-    setControls: (partialControls: VirtualControls) => void;
-}
-
-const GameContext = createContext<GameContextType | null>(null);
 
 export function GameProvider({ children, options }: { children: React.ReactNode; options?: GameOptions }) {
     const gameRef = useRef<MarioGame | null>(null);
@@ -304,19 +289,26 @@ export function GameProvider({ children, options }: { children: React.ReactNode;
 
     const updateOptions = applyOptions;
 
+    const value: GameContextType = {
+        isRunning,
+        soundEnabled,
+        musicEnabled,
+        addPlayer,
+        addElement,
+        updateOptions,
+        options: currentOptions,
+        startGame,
+        stopGame,
+        toggleSound,
+        toggleMusic,
+        setControls,
+    };
+
     return (
-        <GameContext.Provider value={{ isRunning, soundEnabled, musicEnabled, addPlayer, addElement, updateOptions, options: currentOptions, startGame, stopGame, toggleSound, toggleMusic, setControls }}>
+        <GameContext.Provider value={value}>
             {children}
         </GameContext.Provider>
     );
-}
-
-export function useGame() {
-    const context = useContext(GameContext);
-    if (!context) {
-        throw new Error("useGame must be used within a GameProvider");
-    }
-    return context;
 }
 
 function normalizeGameOptions(

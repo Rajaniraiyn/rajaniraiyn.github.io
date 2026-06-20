@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Dialog, DialogDescription, DialogFooter, DialogHeader, DialogPopup, DialogTitle } from "@/components/ui/dialog";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Tooltip, TooltipPopup, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useGame } from "@/contexts/game";
+import { useGame } from "@/contexts/use-game";
 import {
     GAME_SUMMIT_LEAVE_EVENT,
     GAME_SUMMIT_REACHED_EVENT,

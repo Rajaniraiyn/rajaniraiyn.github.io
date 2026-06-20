@@ -175,16 +175,20 @@ export function TabBarProvider() {
             const messages = EMOTIONAL_FLOWS[currentFlow][stage];
 
             // Update emoji based on emotional state (sometimes no emoji for subtlety)
-            if (Math.random() < 0.7) { // 70% chance to show emoji
-                const emojis = EMOJI_MAP[stage as EmotionalStage];
-                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-                setCurrentEmoji(randomEmoji);
-            } else {
-                setCurrentEmoji(null);
-            }
+            setTrackedTimeout(() => {
+                if (Math.random() < 0.7) { // 70% chance to show emoji
+                    const emojis = EMOJI_MAP[stage as EmotionalStage];
+                    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                    setCurrentEmoji(randomEmoji);
+                } else {
+                    setCurrentEmoji(null);
+                }
+            }, 0);
 
             let messageCycleIndex = 0;
-            setCurrentTitle(messages[messageCycleIndex]);
+            setTrackedTimeout(() => {
+                setCurrentTitle(messages[messageCycleIndex]);
+            }, 0);
 
             // Use tracked interval for message cycling
             setTrackedInterval(() => {
@@ -194,16 +198,20 @@ export function TabBarProvider() {
 
         } else if (titleState === TitleState.Focused || titleState === TitleState.Idle) {
             // Don't interrupt title if media is playing
-            if (!isMediaPlaying()) {
-                setCurrentTitle(BASE_TITLE);
-            }
+            setTrackedTimeout(() => {
+                if (!isMediaPlaying()) {
+                    setCurrentTitle(BASE_TITLE);
+                }
+            }, 0);
 
             // Subtle emoji chance when focused (and no media playing)
-            if (titleState === TitleState.Focused && !isMediaPlaying() && Math.random() < 0.2) {
-                setCurrentEmoji("🙂");
-            } else {
-                setCurrentEmoji(null);
-            }
+            setTrackedTimeout(() => {
+                if (titleState === TitleState.Focused && !isMediaPlaying() && Math.random() < 0.2) {
+                    setCurrentEmoji("🙂");
+                } else {
+                    setCurrentEmoji(null);
+                }
+            }, 0);
 
             // Occasional teasing when idle (not focused and no media playing)
             if (titleState === TitleState.Idle && !isMediaPlaying()) {
