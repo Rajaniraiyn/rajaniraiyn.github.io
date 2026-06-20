@@ -10,10 +10,18 @@ type Activity = {
     level: number;
 };
 
-const GitHubCalendar = (
-    (GitHubCalendarImport as unknown as { default?: typeof GitHubCalendarImport }).default
-    ?? GitHubCalendarImport
-) as typeof GitHubCalendarImport;
+type GitHubCalendarComponent = typeof GitHubCalendarImport;
+type GitHubCalendarModule =
+    | GitHubCalendarComponent
+    | { default: GitHubCalendarComponent };
+
+function resolveGitHubCalendar(calendarModule: GitHubCalendarModule) {
+    return "default" in calendarModule
+        ? calendarModule.default
+        : calendarModule;
+}
+
+const GitHubCalendar = resolveGitHubCalendar(GitHubCalendarImport);
 
 export function GitHubContributions() {
     const { resolvedTheme } = useTheme()

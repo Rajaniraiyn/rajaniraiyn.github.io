@@ -14,8 +14,6 @@ import { cn } from "@/lib/utils"
 
 type CharacterSet = string[] | readonly string[]
 
-type HyperTextAs = "div" | "h3"
-
 type HyperTextBaseProps = Omit<MotionProps, "children"> & {
   /** The text content to be animated */
   children: string
@@ -33,11 +31,11 @@ type HyperTextBaseProps = Omit<MotionProps, "children"> & {
   characterSet?: CharacterSet
 }
 
-type HyperTextProps<T extends HyperTextAs = "div"> = HyperTextBaseProps &
-  Omit<React.ComponentPropsWithoutRef<T>, "children"> & {
-    /** Supported host elements — defaults to div */
-    as?: T
-  }
+type HyperTextProps = HyperTextBaseProps &
+  (
+    | ({ as?: "div" } & Omit<React.ComponentPropsWithoutRef<"div">, "children">)
+    | ({ as: "h3" } & Omit<React.ComponentPropsWithoutRef<"h3">, "children">)
+  )
 
 const DEFAULT_CHARACTER_SET = Object.freeze(
   "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")
@@ -53,17 +51,17 @@ const MotionH3 = m.create("h3", {
   forwardMotionProps: true,
 })
 
-export function HyperText<T extends HyperTextAs = "div">({
+export function HyperText({
   children,
   className,
   duration = 800,
   delay = 0,
-  as: Component = "div" as T,
+  as: Component = "div",
   startOnView = false,
   animateOnHover = true,
   characterSet = DEFAULT_CHARACTER_SET,
   ...props
-}: HyperTextProps<T>) {
+}: HyperTextProps) {
   const deferredChildren = useDeferredValue(children)
   const lettersFromChildren = useMemo(
     () => deferredChildren.split(""),

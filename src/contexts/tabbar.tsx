@@ -72,14 +72,22 @@ const EMOJI_MAP = {
     [EmotionalStage.StartOver]: ["😊", "🙂", "✨"],
 };
 
+function getEmotionalStage(switchCount: number) {
+    const stage = Math.floor(switchCount / 3);
+
+    if (stage >= EmotionalStage.StartOver) return EmotionalStage.StartOver;
+    if (stage >= EmotionalStage.GiveUp) return EmotionalStage.GiveUp;
+    if (stage >= EmotionalStage.Crazy) return EmotionalStage.Crazy;
+    if (stage >= EmotionalStage.Mad) return EmotionalStage.Mad;
+    if (stage >= EmotionalStage.Angry) return EmotionalStage.Angry;
+    return EmotionalStage.Sad;
+}
+
 // Check if there's any playing media that we should respect
 const isMediaPlaying = (): boolean => {
-    const mediaElements = [
-        ...document.querySelectorAll('audio'),
-        ...document.querySelectorAll('video')
-    ] as (HTMLAudioElement | HTMLVideoElement)[];
+    const mediaElements = document.querySelectorAll<HTMLAudioElement | HTMLVideoElement>('audio, video');
 
-    return mediaElements.some(media => !media.paused && !media.muted && media.currentTime > 0);
+    return Array.from(mediaElements).some(media => !media.paused && !media.muted && media.currentTime > 0);
 };
 
 export function TabBarProvider() {
@@ -171,13 +179,13 @@ export function TabBarProvider() {
         cleanupTimers();
 
         if (titleState === TitleState.Away) {
-            const stage = Math.min(Math.floor(switchCount / 3), EmotionalStage.StartOver);
+            const stage = getEmotionalStage(switchCount);
             const messages = EMOTIONAL_FLOWS[currentFlow][stage];
 
             // Update emoji based on emotional state (sometimes no emoji for subtlety)
             setTrackedTimeout(() => {
                 if (Math.random() < 0.7) { // 70% chance to show emoji
-                    const emojis = EMOJI_MAP[stage as EmotionalStage];
+                    const emojis = EMOJI_MAP[stage];
                     const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
                     setCurrentEmoji(randomEmoji);
                 } else {
