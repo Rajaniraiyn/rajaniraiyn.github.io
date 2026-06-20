@@ -20,8 +20,19 @@ export function Game() {
     const handleStartGame = useCallback(() => {
         startGame();
         setIsGameDialogOpen(false);
+        setIsLoading(true);
+        setLoadingProgress(0);
         navigate({ to: '/', search: { game: true }, replace: true });
     }, [startGame, navigate]);
+
+    const handleGameDialogOpenChange = useCallback((open: boolean) => {
+        setIsGameDialogOpen(open);
+
+        if (!open) {
+            setIsLoading(true);
+            setLoadingProgress(0);
+        }
+    }, []);
 
     const handleStopGame = useCallback(() => {
         stopGame();
@@ -31,8 +42,6 @@ export function Game() {
     // Preload all sprite images
     useEffect(() => {
         if (!isGameDialogOpen) {
-            setIsLoading(true);
-            setLoadingProgress(0);
             return;
         }
 
@@ -82,7 +91,7 @@ export function Game() {
             />
 
             {/* Instructions Dialog */}
-            <Dialog open={isGameDialogOpen} onOpenChange={setIsGameDialogOpen}>
+            <Dialog open={isGameDialogOpen} onOpenChange={handleGameDialogOpenChange}>
                 <DialogPopup className="max-w-md">
                     <DialogHeader className="text-center space-y-3 pb-4">
                         <div className="flex items-center justify-center gap-3">

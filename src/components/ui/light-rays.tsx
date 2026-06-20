@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from "react"
+import { useMemo, type CSSProperties } from "react"
 import * as m from "motion/react-m"
 
 import { cn } from "@/lib/utils"
@@ -93,12 +93,8 @@ export function LightRays({
   ref,
   ...props
 }: LightRaysProps) {
-  const [rays, setRays] = useState<LightRay[]>([])
   const cycleDuration = Math.max(speed, 0.1)
-
-  useEffect(() => {
-    setRays(createRays(count, cycleDuration))
-  }, [count, cycleDuration])
+  const rays = useMemo(() => createRays(count, cycleDuration), [count, cycleDuration])
 
   return (
     <div
