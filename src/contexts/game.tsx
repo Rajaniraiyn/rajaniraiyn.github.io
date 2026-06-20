@@ -39,19 +39,31 @@ export function GameProvider({ children, options }: { children: React.ReactNode;
         pendingStartRef.current = false;
     }, []);
 
-    const ensureBackgroundMusic = useCallback(async () => {
-        if (!backgroundMusicRef.current) {
-            const { default: backgroundMusicSrc } = await import("@/assets/audio/8-bit-background.mp3");
-            backgroundMusicRef.current = new Audio(backgroundMusicSrc);
-            backgroundMusicRef.current.loop = true;
-            backgroundMusicRef.current.volume = 0.3;
+    const ensureBackgroundMusic = useCallback(async (generation: number) => {
+        if (backgroundMusicRef.current) {
+            return backgroundMusicRef.current;
         }
+
+        const { default: backgroundMusicSrc } = await import("@/assets/audio/8-bit-background.mp3");
+
+        if (generation !== loadGenerationRef.current) {
+            return null;
+        }
+
+        backgroundMusicRef.current = new Audio(backgroundMusicSrc);
+        backgroundMusicRef.current.loop = true;
+        backgroundMusicRef.current.volume = 0.3;
 
         return backgroundMusicRef.current;
     }, []);
 
-    const playBackgroundMusic = useCallback(async () => {
-        const audio = await ensureBackgroundMusic();
+    const playBackgroundMusic = useCallback(async (generation = loadGenerationRef.current) => {
+        const audio = await ensureBackgroundMusic(generation);
+
+        if (!audio || generation !== loadGenerationRef.current) {
+            return;
+        }
+
         audio.play().catch(() => {
             // Ignore play errors (user interaction required)
         });
@@ -80,11 +92,13 @@ export function GameProvider({ children, options }: { children: React.ReactNode;
     const startGameInternal = useCallback(async () => {
         if (!gameRef.current) return;
 
+        const generation = loadGenerationRef.current;
+
         gameRef.current.start();
         setIsRunning(true);
 
-        if (musicEnabledRef.current) {
-            await playBackgroundMusic();
+        if (musicEnabledRef.current && generation === loadGenerationRef.current) {
+            await playBackgroundMusic(generation);
         }
     }, [playBackgroundMusic]);
 

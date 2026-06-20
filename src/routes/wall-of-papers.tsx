@@ -14,9 +14,18 @@ export const Route = createFileRoute('/wall-of-papers')({
 })
 
 function RouteComponent() {
-    const { i: selected } = Route.useSearch()
+    const { i: searchIndex } = Route.useSearch()
     const navigate = Route.useNavigate()
     const [, setSavedWallpaper] = useFavoriteWallpaper()
+
+    const selectedIndex =
+        searchIndex !== undefined &&
+        Number.isInteger(searchIndex) &&
+        searchIndex >= 0 &&
+        searchIndex < wallpapers.length
+            ? searchIndex
+            : undefined
+    const selectedWallpaper = selectedIndex !== undefined ? wallpapers[selectedIndex] : undefined
 
     const openFullscreen = useCallback((index: number) => {
         navigate({ search: { i: index }, replace: true as const })
@@ -27,11 +36,11 @@ function RouteComponent() {
     }, [navigate])
 
     const handleLikeWallpaper = useCallback(() => {
-        if (selected !== undefined) {
-            setSavedWallpaper(wallpapers[selected])
+        if (selectedWallpaper !== undefined) {
+            setSavedWallpaper(selectedWallpaper)
             navigate({ to: '/' })
         }
-    }, [selected, navigate, setSavedWallpaper])
+    }, [selectedWallpaper, navigate, setSavedWallpaper])
 
     const handleDialogOpenChange = useCallback((open: boolean) => {
         if (!open) {
@@ -40,16 +49,16 @@ function RouteComponent() {
     }, [closeFullscreen])
 
     const goToPrevious = useCallback(() => {
-        if (selected !== undefined) {
-            openFullscreen(selected > 0 ? selected - 1 : wallpapers.length - 1)
+        if (selectedIndex !== undefined) {
+            openFullscreen(selectedIndex > 0 ? selectedIndex - 1 : wallpapers.length - 1)
         }
-    }, [selected, openFullscreen])
+    }, [selectedIndex, openFullscreen])
 
     const goToNext = useCallback(() => {
-        if (selected !== undefined) {
-            openFullscreen(selected < wallpapers.length - 1 ? selected + 1 : 0)
+        if (selectedIndex !== undefined) {
+            openFullscreen(selectedIndex < wallpapers.length - 1 ? selectedIndex + 1 : 0)
         }
-    }, [selected, openFullscreen])
+    }, [selectedIndex, openFullscreen])
 
     return (
         <>
@@ -83,7 +92,7 @@ function RouteComponent() {
                 </div>
             </div>
 
-            <Dialog open={selected !== undefined} onOpenChange={handleDialogOpenChange}>
+            <Dialog open={selectedIndex !== undefined} onOpenChange={handleDialogOpenChange}>
                 <DialogPopup
                     showCloseButton={false}
                     backdropClassName="bg-black/75"
@@ -91,11 +100,11 @@ function RouteComponent() {
                     positionerClassName="flex h-full w-full flex-row items-center justify-center overflow-hidden p-4 pointer-events-none pt-0 before:hidden after:hidden max-sm:before:hidden sm:overflow-hidden sm:p-4 sm:before:basis-0 sm:after:flex-none"
                     className="pointer-events-auto relative flex h-full max-h-full w-full max-w-7xl items-center justify-center border-none bg-transparent p-0 shadow-none sm:max-w-7xl sm:scale-100 sm:rounded-none before:hidden dark:before:hidden"
                 >
-                    {selected !== undefined && (
+                    {selectedWallpaper !== undefined && selectedIndex !== undefined && (
                         <>
                             <img
-                                src={wallpapers[selected]}
-                                alt={`Wallpaper ${selected + 1}`}
+                                src={selectedWallpaper}
+                                alt={`Wallpaper ${selectedIndex + 1}`}
                                 className='max-h-full max-w-full rounded-lg object-contain shadow-2xl'
                                 style={{ imageRendering: 'pixelated' }}
                                 decoding="async"
@@ -113,7 +122,7 @@ function RouteComponent() {
 
                             <div className='absolute bottom-4 left-0 right-0 flex items-center justify-between gap-4 px-4'>
                                 <div className='rounded-full bg-black/50 px-4 py-2 text-sm text-white backdrop-blur-sm'>
-                                    {selected + 1} / {wallpapers.length}
+                                    {selectedIndex + 1} / {wallpapers.length}
                                 </div>
 
                                 <Button

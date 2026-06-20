@@ -263,7 +263,7 @@ export function Game() {
         <>
             {/* Game Character - only visible when running */}
             <img
-                className={`size-20 -left-6! z-100 will-change-transform transition-opacity duration-300 ${isRunning ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                className={`size-20 -left-6! z-100 pointer-events-none will-change-transform transition-opacity duration-300 ${isRunning ? 'opacity-100' : 'opacity-0'
                     }`}
                 ref={characterRef}
                 alt="Character"
