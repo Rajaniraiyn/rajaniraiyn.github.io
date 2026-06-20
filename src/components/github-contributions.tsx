@@ -1,5 +1,5 @@
 import { useTheme } from "@/contexts/use-theme";
-import GitHubCalendar from "react-github-calendar";
+import GitHubCalendarImport from "react-github-calendar";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "./ui/tooltip";
 import { GameElement, GameSurface } from "@/lib/game-types";
 import { useGameElement } from "@/hooks/use-game-element";
@@ -9,6 +9,11 @@ type Activity = {
     count: number;
     level: number;
 };
+
+const GitHubCalendar = (
+    (GitHubCalendarImport as unknown as { default?: typeof GitHubCalendarImport }).default
+    ?? GitHubCalendarImport
+) as typeof GitHubCalendarImport;
 
 export function GitHubContributions() {
     const { resolvedTheme } = useTheme()
