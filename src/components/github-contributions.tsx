@@ -18,11 +18,15 @@ export function GitHubContributions() {
             colorScheme={resolvedTheme}
             showWeekdayLabels
             weekStart={1}
-            renderBlock={(block, activity) => (
-                <ContributionBlock block={block} activity={activity} />
-            )}
+            renderBlock={renderBlock}
             renderColorLegend={renderColorLegend}
         />
+    )
+}
+
+function renderBlock(block: React.ReactNode, activity: Activity) {
+    return (
+        <ContributionBlock block={block} activity={activity} />
     )
 }
 

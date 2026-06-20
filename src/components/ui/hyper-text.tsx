@@ -14,7 +14,9 @@ import { cn } from "@/lib/utils"
 
 type CharacterSet = string[] | readonly string[]
 
-type HyperTextProps<T extends React.ElementType> = Omit<MotionProps, "children"> & React.ComponentPropsWithoutRef<T> & {
+type HyperTextAs = "div" | "h3"
+
+type HyperTextBaseProps = Omit<MotionProps, "children"> & {
   /** The text content to be animated */
   children: string
   /** Optional className for styling */
@@ -23,8 +25,6 @@ type HyperTextProps<T extends React.ElementType> = Omit<MotionProps, "children">
   duration?: number
   /** Delay before animation starts in milliseconds */
   delay?: number
-  /** Component to render as - defaults to div */
-  as?: T
   /** Whether to start animation when element comes into view */
   startOnView?: boolean
   /** Whether to trigger animation on hover */
@@ -32,6 +32,12 @@ type HyperTextProps<T extends React.ElementType> = Omit<MotionProps, "children">
   /** Custom character set for scramble effect. Defaults to uppercase alphabet */
   characterSet?: CharacterSet
 }
+
+type HyperTextProps<T extends HyperTextAs = "div"> = HyperTextBaseProps &
+  Omit<React.ComponentPropsWithoutRef<T>, "children"> & {
+    /** Supported host elements — defaults to div */
+    as?: T
+  }
 
 const DEFAULT_CHARACTER_SET = Object.freeze(
   "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")
@@ -47,12 +53,12 @@ const MotionH3 = m.create("h3", {
   forwardMotionProps: true,
 })
 
-export function HyperText<T extends React.ElementType = "div">({
+export function HyperText<T extends HyperTextAs = "div">({
   children,
   className,
   duration = 800,
   delay = 0,
-  as: Component = 'div' as T,
+  as: Component = "div" as T,
   startOnView = false,
   animateOnHover = true,
   characterSet = DEFAULT_CHARACTER_SET,
