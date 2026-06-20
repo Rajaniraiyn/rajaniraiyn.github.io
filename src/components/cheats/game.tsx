@@ -1,13 +1,21 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogDescription, DialogFooter, DialogHeader, DialogPopup, DialogTitle } from "@/components/ui/dialog";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Tooltip, TooltipPopup, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useGame } from "@/contexts/game";
+import {
+    GAME_SUMMIT_LEAVE_EVENT,
+    GAME_SUMMIT_REACHED_EVENT,
+    SUMMIT_REWARD_WALLPAPER,
+    useGameProgress,
+} from "@/data/game-progress";
+import { useFavoriteWallpaper } from "@/data/wallpapers";
 import { Man } from "@/lib/game-assets";
 import type { VirtualControls } from "@/lib/mario-game";
 import { useNavigate } from '@tanstack/react-router';
-import { ArrowUp, ChevronLeft, ChevronRight, Gamepad2, Loader2, Music, Play, Square, Volume2, VolumeX, Footprints } from "lucide-react";
+import { ArrowUp, ChevronLeft, ChevronRight, Gamepad2, Heart, Loader2, Music, Play, Square, Volume2, VolumeX, Footprints, Mountain, Check } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 
 type ControlKey = keyof VirtualControls;
@@ -105,11 +113,59 @@ function MobileGameControls({ setControls }: { setControls: (partialControls: Vi
     );
 }
 
+const CONFETTI_COLORS = ['#FFD700', '#FFA500', '#FFFF00', '#FFFFFF', '#FF6B35'];
+
+function fireSummitConfetti() {
+    void import('canvas-confetti').then(({ default: confetti }) => {
+        confetti({
+            particleCount: 60,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0, y: 0.75 },
+            colors: CONFETTI_COLORS,
+        });
+        confetti({
+            particleCount: 60,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1, y: 0.75 },
+            colors: CONFETTI_COLORS,
+        });
+    });
+}
+
+function GameObjectiveHud({ hasCompletedGame }: { hasCompletedGame: boolean }) {
+    return (
+        <div className="fixed top-4 left-4 z-50 max-w-[calc(100%-5rem)] md:max-w-xs pointer-events-none">
+            {hasCompletedGame ? (
+                <Badge
+                    variant="secondary"
+                    className="bg-background/95 backdrop-blur-sm border-border/50 shadow-lg gap-1.5 pointer-events-auto"
+                >
+                    <Check className="size-3.5" aria-hidden="true" />
+                    Summit conquered
+                </Badge>
+            ) : (
+                <Badge
+                    variant="outline"
+                    className="bg-background/95 backdrop-blur-sm border-border/50 shadow-lg gap-1.5 text-muted-foreground pointer-events-auto"
+                >
+                    <Mountain className="size-3.5" aria-hidden="true" />
+                    Reach the summit
+                </Badge>
+            )}
+        </div>
+    );
+}
+
 export function Game() {
     const characterRef = useRef<HTMLImageElement>(null);
     const { addPlayer, isRunning, startGame, stopGame, soundEnabled, musicEnabled, toggleSound, toggleMusic, setControls } = useGame();
     const navigate = useNavigate();
+    const [hasCompletedGame] = useGameProgress();
+    const [favoriteWallpaper, setFavoriteWallpaper] = useFavoriteWallpaper();
     const [isGameDialogOpen, setIsGameDialogOpen] = useState(true);
+    const [isCompletionDialogOpen, setIsCompletionDialogOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [loadingProgress, setLoadingProgress] = useState(0);
 
@@ -131,9 +187,35 @@ export function Game() {
     }, []);
 
     const handleStopGame = useCallback(() => {
+        setIsCompletionDialogOpen(false);
         stopGame();
         navigate({ to: '/', search: {}, replace: true, resetScroll: false });
     }, [stopGame, navigate]);
+
+    const handleContinueExploring = useCallback(() => {
+        handleStopGame();
+    }, [handleStopGame]);
+
+    const handleSetSummitWallpaper = useCallback(() => {
+        setFavoriteWallpaper(SUMMIT_REWARD_WALLPAPER);
+    }, [setFavoriteWallpaper]);
+
+    useEffect(() => {
+        const onSummitReached = () => {
+            setIsCompletionDialogOpen(true);
+            fireSummitConfetti();
+        };
+        const onSummitLeave = () => {
+            setIsCompletionDialogOpen(false);
+        };
+
+        window.addEventListener(GAME_SUMMIT_REACHED_EVENT, onSummitReached);
+        window.addEventListener(GAME_SUMMIT_LEAVE_EVENT, onSummitLeave);
+        return () => {
+            window.removeEventListener(GAME_SUMMIT_REACHED_EVENT, onSummitReached);
+            window.removeEventListener(GAME_SUMMIT_LEAVE_EVENT, onSummitLeave);
+        };
+    }, []);
 
     // Preload all sprite images
     useEffect(() => {
@@ -228,9 +310,16 @@ export function Game() {
                                 <h3 className="font-semibold text-sm uppercase tracking-wide text-accent-foreground/80">
                                     Objective
                                 </h3>
-                                <p className="text-sm text-accent-foreground/70 leading-relaxed">
-                                    Reach the pinnacle of this world (page) and discover what's at the top!
-                                </p>
+                                {hasCompletedGame ? (
+                                    <p className="text-sm text-accent-foreground/70 leading-relaxed flex items-center gap-2">
+                                        <Check className="size-4 shrink-0" aria-hidden="true" />
+                                        Summit conquered — explore freely or chase a new high.
+                                    </p>
+                                ) : (
+                                    <p className="text-sm text-accent-foreground/70 leading-relaxed">
+                                        Reach the pinnacle of this world (page) and discover what&apos;s at the top!
+                                    </p>
+                                )}
                             </div>
 
                             {/* Controls */}
@@ -284,9 +373,45 @@ export function Game() {
                 </DialogPopup>
             </Dialog>
 
+            <Dialog open={isCompletionDialogOpen} onOpenChange={setIsCompletionDialogOpen}>
+                <DialogPopup className="max-w-md" showCloseButton={false}>
+                    <DialogHeader className="text-center space-y-3 pb-2">
+                        <div className="flex items-center justify-center gap-3">
+                            <div className="p-2 bg-primary/10 rounded-full">
+                                <Mountain className="size-6 text-primary" />
+                            </div>
+                            <DialogTitle className="text-2xl font-bold font-departure-mono">
+                                Summit reached
+                            </DialogTitle>
+                        </div>
+                        <DialogDescription className="text-sm leading-relaxed">
+                            You climbed from the footer to the very first highlight — the pinnacle of interaction
+                            engineering on this page. Take the view with you, or keep wandering.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <DialogFooter className="sm:flex-col gap-2">
+                        {favoriteWallpaper !== SUMMIT_REWARD_WALLPAPER && (
+                            <Button
+                                onClick={handleSetSummitWallpaper}
+                                variant="outline"
+                                className="w-full"
+                            >
+                                <Heart className="size-4 mr-2" />
+                                Set summit wallpaper
+                            </Button>
+                        )}
+                        <Button onClick={handleContinueExploring} className="w-full" size="lg">
+                            Continue exploring
+                        </Button>
+                    </DialogFooter>
+                </DialogPopup>
+            </Dialog>
+
             {/* Game Controls Overlay - when game is running */}
             {isRunning && (
                 <>
+                    <GameObjectiveHud hasCompletedGame={hasCompletedGame} />
                     {/* Top Controls */}
                     <div className="fixed top-4 right-4 z-50 flex gap-2">
                         <TooltipProvider delay={0}>
