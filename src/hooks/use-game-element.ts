@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from "react"
-import type { DependencyList } from "react"
 
-import { useGame } from "@/contexts/game"
+import { useGame } from "@/contexts/use-game"
 import type { GameElementRegistration } from "@/lib/game-types"
 
 function normalizeConfig(config: Omit<GameElementRegistration, 'events'>): Omit<GameElementRegistration, 'events'> {
@@ -15,14 +14,18 @@ function normalizeConfig(config: Omit<GameElementRegistration, 'events'>): Omit<
 
 export function useGameElement<T extends HTMLElement | SVGElement>(
     config: GameElementRegistration,
-    deps: DependencyList = [],
 ) {
     const { addElement } = useGame()
     const cleanupRef = useRef<(() => void) | null>(null)
 
     // Extract events from config to avoid including them in deps unnecessarily
     const { events, ...configWithoutEvents } = config
-    const normalizedConfig = useMemo(() => normalizeConfig(configWithoutEvents), deps)
+    const normalizedConfig = useMemo(
+        () => normalizeConfig(configWithoutEvents),
+        // Normalize once on mount; call sites pass stable inline config objects.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [],
+    )
 
     // Combine normalized config with events
     const finalConfig = useMemo(() => ({

@@ -9,8 +9,7 @@ import {
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button-variants"
-
-const toastManager = Toast.createToastManager()
+import { toastManager } from "@/components/ui/toast-manager"
 
 const TOAST_ICONS = {
   loading: LoaderCircleIcon,
@@ -163,4 +162,4 @@ function ToastList({ position = "bottom-right" }: { position: ToastPosition }) {
   )
 }
 
-export { ToastProvider, type ToastPosition, toastManager }
+export { ToastProvider, type ToastPosition }

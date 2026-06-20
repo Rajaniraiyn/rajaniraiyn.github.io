@@ -1,5 +1,5 @@
-import { useTheme } from "@/contexts/theme";
-import GitHubCalendar from "react-github-calendar";
+import { useTheme } from "@/contexts/use-theme";
+import GitHubCalendarImport from "react-github-calendar";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "./ui/tooltip";
 import { GameElement, GameSurface } from "@/lib/game-types";
 import { useGameElement } from "@/hooks/use-game-element";
@@ -9,6 +9,19 @@ type Activity = {
     count: number;
     level: number;
 };
+
+type GitHubCalendarComponent = typeof GitHubCalendarImport;
+type GitHubCalendarModule =
+    | GitHubCalendarComponent
+    | { default: GitHubCalendarComponent };
+
+function resolveGitHubCalendar(calendarModule: GitHubCalendarModule) {
+    return "default" in calendarModule
+        ? calendarModule.default
+        : calendarModule;
+}
+
+const GitHubCalendar = resolveGitHubCalendar(GitHubCalendarImport);
 
 export function GitHubContributions() {
     const { resolvedTheme } = useTheme()
@@ -25,6 +38,12 @@ export function GitHubContributions() {
 }
 
 function renderBlock(block: React.ReactNode, activity: Activity) {
+    return (
+        <ContributionBlock block={block} activity={activity} />
+    )
+}
+
+function ContributionBlock({ block, activity }: { block: React.ReactNode; activity: Activity }) {
     const platformRef = useGameElement<SVGSVGElement>({
         type: GameElement.PLATFORM,
         surface: GameSurface.WOOD,
