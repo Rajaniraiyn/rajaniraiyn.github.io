@@ -37,6 +37,8 @@ function DialogBackdrop({
 
 function DialogPopup({
   backdropClassName,
+  containerClassName,
+  positionerClassName,
   className,
   children,
   showCloseButton = true,
@@ -44,12 +46,19 @@ function DialogPopup({
 }: DialogPrimitive.Popup.Props & {
   showCloseButton?: boolean
   backdropClassName?: string
+  containerClassName?: string
+  positionerClassName?: string
 }) {
   return (
     <DialogPortal>
       <DialogBackdrop className={backdropClassName} />
-      <div className="fixed inset-0 z-50">
-        <div className="flex h-[100dvh] flex-col items-center overflow-hidden pt-6 max-sm:before:flex-1 sm:overflow-y-auto sm:p-4 sm:before:basis-[20vh] sm:after:flex-1">
+      <div className={cn("fixed inset-0 z-50", containerClassName)}>
+        <div
+          className={cn(
+            "flex h-[100dvh] flex-col items-center overflow-hidden pt-6 max-sm:before:flex-1 sm:overflow-y-auto sm:p-4 sm:before:basis-[20vh] sm:after:flex-1",
+            positionerClassName
+          )}
+        >
           <DialogPrimitive.Popup
             data-slot="dialog-popup"
             className={cn(

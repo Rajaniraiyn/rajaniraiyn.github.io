@@ -127,8 +127,10 @@ function RouteComponent() {
             <Dialog open={selected !== undefined} onOpenChange={handleDialogOpenChange}>
                 <DialogPopup
                     showCloseButton={false}
-                    backdropClassName="bg-black/75 backdrop-blur-sm"
-                    className="relative flex max-h-full max-w-7xl items-center justify-center border-none bg-transparent p-0 shadow-none sm:max-w-7xl sm:scale-100 sm:rounded-none before:hidden dark:before:hidden"
+                    backdropClassName="bg-black/75"
+                    containerClassName="pointer-events-none"
+                    positionerClassName="flex h-full w-full flex-row items-center justify-center overflow-hidden p-4 pointer-events-none pt-0 before:hidden after:hidden max-sm:before:hidden sm:overflow-hidden sm:p-4 sm:before:basis-0 sm:after:flex-none"
+                    className="pointer-events-auto relative flex h-full max-h-full w-full max-w-7xl items-center justify-center border-none bg-transparent p-0 shadow-none sm:max-w-7xl sm:scale-100 sm:rounded-none before:hidden dark:before:hidden"
                 >
                     {selected !== undefined && (
                         <>
